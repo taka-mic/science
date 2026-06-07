@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>次世代型 暗記フラッシュカード｜高校受験 理科</title>
+<style>
+:root {
+  --bg: #060c1a;
+  --bg2: #0a1628;
+  --bg3: #0f1e38;
+  --cyan: #00ffcc;
+  --blue: #0088ff;
+  --purple: #8800ff;
+  --green: #00ff64;
+  --orange: #ff8800;
+  --red: #ff3366;
+  --text: #d0e8ff;
+  --dim: #4a6a8a;
+  --card-bg: #0d1f3c;
+  --card-border: #1a3a6a;
+  --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+canvas#bg { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+
+/* ── Layout ── */
+#app { position: relative; z-index:1; max-width: 820px; margin: 0 auto; padding: 16px 12px 60px; }
+
+/* ── Header ── */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0 10px;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 16px;
+}
+header h1 {
+  font-size: 1.1rem; font-weight: 800; letter-spacing: .04em;
+  background: linear-gradient(90deg, var(--cyan), var(--blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hdr-sub { font-size: .7rem; color: var(--dim); margin-top: 2px; }
+
+/* ── Progress Bar ── */
+.progress-wrap {
+  background: var(--bg3); border-radius: 99px; height: 10px;
+  margin-bottom: 12px; overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+.progress-bar {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--cyan), var(--green));
+  transition: width .5s ease;
+}
+.progress-label {
+  font-size: .72rem; color: var(--dim); text-align: right; margin-bottom: 14px;
+}
+.progress-label span { color: var(--cyan); font-weight: 700; }
+
+/* ── Filter Tabs ── */
+.filter-row {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.filter-btn {
+  padding: 5px 14px; border-radius: 99px; font-size: .75rem; font-weight: 700;
+  border: 1.5px solid var(--card-border); background: var(--bg2); color: var(--dim);
+  cursor: pointer; transition: all .2s;
+}
+.filter-btn:hover { border-color: var(--blue); color: var(--blue); }
+.filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.filter-btn.cat-bio.active  { background: var(--green);  border-color: var(--green);  color: #000; }
+.filter-btn.cat-geo.active  { background: var(--orange); border-color: var(--orange); color: #000; }
+.filter-btn.cat-chem.active { background: var(--cyan);   border-color: var(--cyan);   color: #000; }
+.filter-btn.cat-phys.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+
+/* ── Mode Toggles ── */
+.toggle-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.toggle-btn {
+  padding: 5px 14px; border-radius: 99px; font-size: .75rem; font-weight: 700;
+  border: 1.5px solid var(--card-border); background: var(--bg2); color: var(--dim);
+  cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 5px;
+}
+.toggle-btn.on { border-color: var(--cyan); color: var(--cyan); }
+.toggle-btn .dot { width:8px; height:8px; border-radius:50%; background: var(--dim); transition: .2s; }
+.toggle-btn.on .dot { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+
+/* ── Card Flip ── */
+.card-area { perspective: 1200px; margin-bottom: 18px; }
+.card-wrap {
+  width: 100%; min-height: 220px;
+  position: relative; transform-style: preserve-3d;
+  transition: transform .55s cubic-bezier(.4,0,.2,1);
+  cursor: pointer;
+}
+.card-wrap.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute; width: 100%; min-height: 220px;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: var(--radius);
+  padding: 24px 22px;
+  display: flex; flex-direction: column; justify-content: center;
+  border: 1.5px solid var(--card-border);
+}
+.card-front {
+  background: linear-gradient(145deg, var(--card-bg), #071530);
+}
+.card-back {
+  background: linear-gradient(145deg, #071a2e, #0a2040);
+  transform: rotateY(180deg);
+}
+.card-cat {
+  font-size: .65rem; font-weight: 700; letter-spacing: .08em;
+  padding: 3px 10px; border-radius: 99px; display: inline-block;
+  margin-bottom: 14px; align-self: flex-start;
+}
+.cat-bio  .card-cat { background: rgba(0,255,100,.15); color: var(--green);  border: 1px solid var(--green); }
+.cat-geo  .card-cat { background: rgba(255,136,0,.15); color: var(--orange); border: 1px solid var(--orange); }
+.cat-chem .card-cat { background: rgba(0,255,204,.15); color: var(--cyan);   border: 1px solid var(--cyan); }
+.cat-phys .card-cat { background: rgba(136,0,255,.15); color: var(--purple); border: 1px solid var(--purple); }
+.card-q {
+  font-size: 1.05rem; font-weight: 700; line-height: 1.65; color: #e8f4ff;
+}
+.card-hint { font-size: .68rem; color: var(--dim); margin-top: 14px; text-align: center; }
+.card-a {
+  font-size: 1rem; font-weight: 700; line-height: 1.6; color: var(--cyan); margin-bottom: 12px;
+}
+.card-exp {
+  font-size: .78rem; color: var(--text); line-height: 1.7;
+  border-top: 1px solid var(--card-border); padding-top: 10px; margin-top: 4px;
+}
+.card-exp strong { color: var(--orange); }
+.card-num { font-size: .65rem; color: var(--dim); margin-bottom: 10px; }
+.no-cards {
+  text-align: center; padding: 50px 20px; color: var(--dim); font-size: .9rem;
+}
+
+/* ── Judge Buttons ── */
+.judge-row {
+  display: flex; gap: 10px; margin-bottom: 16px;
+}
+.judge-btn {
+  flex: 1; padding: 13px; border-radius: var(--radius); font-size: .9rem; font-weight: 800;
+  border: none; cursor: pointer; transition: all .15s; letter-spacing: .04em;
+}
+.btn-ok   { background: linear-gradient(135deg, #00cc88, #008855); color: #fff; }
+.btn-ok:hover   { filter: brightness(1.15); transform: translateY(-2px); }
+.btn-ng   { background: linear-gradient(135deg, #cc3355, #881133); color: #fff; }
+.btn-ng:hover   { filter: brightness(1.15); transform: translateY(-2px); }
+.btn-skip { background: var(--bg3); color: var(--dim); border: 1.5px solid var(--card-border); }
+.btn-skip:hover { border-color: var(--blue); color: var(--blue); }
+.judge-row.hidden { display: none; }
+
+/* ── Nav Buttons ── */
+.nav-row { display: flex; gap: 8px; margin-bottom: 20px; }
+.nav-btn {
+  padding: 8px 16px; border-radius: var(--radius); font-size: .75rem; font-weight: 700;
+  border: 1.5px solid var(--card-border); background: var(--bg2); color: var(--dim);
+  cursor: pointer; transition: all .2s;
+}
+.nav-btn:hover { border-color: var(--blue); color: var(--blue); }
+.nav-btn.primary { border-color: var(--cyan); color: var(--cyan); }
+.nav-btn.primary:hover { background: rgba(0,255,204,.1); }
+
+/* ── Queue Info ── */
+.queue-info {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;
+}
+.qi {
+  display: flex; align-items: center; gap: 5px;
+  font-size: .72rem; color: var(--dim);
+}
+.qi-dot { width:8px; height:8px; border-radius:50%; }
+.qi-total .qi-dot { background: var(--blue); }
+.qi-ok    .qi-dot { background: var(--green); }
+.qi-ng    .qi-dot { background: var(--red); }
+
+/* ── Add Card Form ── */
+.add-section {
+  border: 1.5px solid var(--card-border); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 20px;
+  background: var(--bg2);
+}
+.add-section summary {
+  cursor: pointer; font-size: .82rem; font-weight: 700; color: var(--cyan);
+  user-select: none; list-style: none; display: flex; align-items: center; gap: 8px;
+}
+.add-section summary::before { content: '＋'; font-size: 1rem; }
+details[open] summary::before { content: '－'; }
+.add-form {
+  margin-top: 14px; display: flex; flex-direction: column; gap: 10px;
+}
+.add-form label { font-size: .72rem; color: var(--dim); margin-bottom: 2px; display: block; }
+.add-form select, .add-form textarea, .add-form input[type=text] {
+  width: 100%; background: var(--bg3); border: 1.5px solid var(--card-border);
+  border-radius: 8px; color: var(--text); font-size: .82rem; padding: 8px 10px;
+  font-family: inherit; resize: vertical; outline: none; transition: border-color .2s;
+}
+.add-form select:focus,
+.add-form textarea:focus,
+.add-form input[type=text]:focus { border-color: var(--cyan); }
+.add-form .row2 { display: flex; gap: 8px; }
+.add-form .row2 > * { flex: 1; }
+.btn-add-card {
+  padding: 10px; border-radius: 8px; font-size: .82rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  color: #000; border: none; cursor: pointer; transition: filter .2s;
+}
+.btn-add-card:hover { filter: brightness(1.1); }
+
+/* ── Card List (manage) ── */
+.manage-section {
+  border: 1.5px solid var(--card-border); border-radius: var(--radius);
+  padding: 16px; background: var(--bg2);
+}
+.manage-section summary {
+  cursor: pointer; font-size: .82rem; font-weight: 700; color: var(--orange);
+  user-select: none; list-style: none; display: flex; align-items: center; gap: 8px;
+}
+.manage-section summary::before { content: '▶ '; }
+details[open].manage-section summary::before { content: '▼ '; }
+.card-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.card-list-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  background: var(--bg3); border-radius: 8px; border: 1px solid var(--card-border);
+  font-size: .75rem;
+}
+.cli-cat {
+  font-size: .6rem; font-weight: 700; padding: 2px 7px; border-radius: 99px;
+  min-width: 42px; text-align: center;
+}
+.cli-q { flex: 1; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cli-ok { font-size: .65rem; color: var(--green); font-weight: 700; margin-left: auto; white-space: nowrap; }
+.cli-del {
+  background: none; border: 1px solid var(--red); border-radius: 6px;
+  color: var(--red); font-size: .68rem; padding: 3px 7px; cursor: pointer; transition: .2s;
+  white-space: nowrap;
+}
+.cli-del:hover { background: rgba(255,51,102,.15); }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--bg3); border: 1px solid var(--cyan); border-radius: 99px;
+  padding: 8px 20px; font-size: .78rem; color: var(--cyan); font-weight: 700;
+  opacity: 0; transition: all .3s; pointer-events: none; z-index: 999; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 540px) {
+  .card-q { font-size: .92rem; }
+  .card-a { font-size: .88rem; }
+  header h1 { font-size: .95rem; }
+  .add-form .row2 { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="app">
+  <header>
+    <div>
+      <h1>次世代型 暗記フラッシュカード</h1>
+      <div class="hdr-sub">高校受験 理科｜生物・地学・化学・物理</div>
+    </div>
+    <div style="font-size:.72rem;color:var(--dim);text-align:right;">
+      <div id="hdr-total">0 cards</div>
+      <div id="hdr-ok" style="color:var(--green);"></div>
+    </div>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+  <div class="progress-label">覚えた: <span id="pct-label">0%</span>（<span id="ok-count">0</span> / <span id="total-count">0</span>）</div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-row" id="filter-row">
+    <button class="filter-btn active" data-cat="all" onclick="setFilter('all',this)">全カテゴリ</button>
+    <button class="filter-btn cat-bio"  data-cat="生物" onclick="setFilter('生物',this)">生物</button>
+    <button class="filter-btn cat-geo"  data-cat="地学" onclick="setFilter('地学',this)">地学</button>
+    <button class="filter-btn cat-chem" data-cat="化学" onclick="setFilter('化学',this)">化学</button>
+    <button class="filter-btn cat-phys" data-cat="物理" onclick="setFilter('物理',this)">物理</button>
+  </div>
+
+  <!-- Toggles -->
+  <div class="toggle-row">
+    <button class="toggle-btn" id="btn-review-only" onclick="toggleReviewOnly()">
+      <span class="dot"></span>要復習のみ
+    </button>
+    <button class="toggle-btn" id="btn-shuffle" onclick="toggleShuffle()">
+      <span class="dot"></span>シャッフル
+    </button>
+    <button class="toggle-btn" id="btn-show-all" onclick="toggleShowAll()">
+      <span class="dot"></span>全カード表示
+    </button>
+  </div>
+
+  <!-- Queue Info -->
+  <div class="queue-info">
+    <div class="qi qi-total"><span class="qi-dot"></span><span id="qi-rem">残 0 枚</span></div>
+    <div class="qi qi-ok"><span class="qi-dot"></span><span id="qi-ok">覚えた 0</span></div>
+    <div class="qi qi-ng"><span class="qi-dot"></span><span id="qi-ng">要復習 0</span></div>
+  </div>
+
+  <!-- Card -->
+  <div class="card-area" id="card-area">
+    <div class="card-wrap" id="card-wrap" onclick="flipCard()">
+      <div class="card-face card-front" id="card-front">
+        <div class="no-cards">カードがありません</div>
+      </div>
+      <div class="card-face card-back" id="card-back"></div>
+    </div>
+  </div>
+
+  <!-- Judge -->
+  <div class="judge-row hidden" id="judge-row">
+    <button class="judge-btn btn-ok" onclick="judge(true)">✓ 覚えた</button>
+    <button class="judge-btn btn-ng" onclick="judge(false)">△ まだ</button>
+    <button class="judge-btn btn-skip" onclick="skip()">→ スキップ</button>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav-row">
+    <button class="nav-btn primary" onclick="resetQueue()">最初から</button>
+    <button class="nav-btn" onclick="resetMastered()">進捗リセット</button>
+  </div>
+
+  <!-- Add Card -->
+  <details class="add-section" id="add-details">
+    <summary>カードを追加する</summary>
+    <div class="add-form">
+      <div class="row2">
+        <div>
+          <label>カテゴリ</label>
+          <select id="in-cat">
+            <option value="生物">生物</option>
+            <option value="地学">地学</option>
+            <option value="化学">化学</option>
+            <option value="物理">物理</option>
+          </select>
+        </div>
+        <div>
+          <label>タグ（任意）</label>
+          <input type="text" id="in-tag" placeholder="例: 細胞分裂">
+        </div>
+      </div>
+      <div>
+        <label>問題文</label>
+        <textarea id="in-q" rows="3" placeholder="例: アンモニアの集め方とその理由を答えよ。"></textarea>
+      </div>
+      <div>
+        <label>答え</label>
+        <textarea id="in-a" rows="2" placeholder="例: 上方置換法。アンモニアは空気より軽いため。"></textarea>
+      </div>
+      <div>
+        <label>解説・補足（任意）</label>
+        <textarea id="in-exp" rows="2" placeholder="例: NH₃は水に非常に溶けやすいため水上置換は使えない。"></textarea>
+      </div>
+      <button class="btn-add-card" onclick="addCard()">カードを追加</button>
+    </div>
+  </details>
+
+  <!-- Manage Cards -->
+  <details class="manage-section" style="margin-top:10px;">
+    <summary>カード一覧・削除</summary>
+    <div class="card-list" id="card-list"></div>
+  </details>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── Default Cards ─────────────────────────────────────────────────────────
+const DEFAULT_CARDS = [
+  // 化学
+  { id:'d01', cat:'化学', cls:'cat-chem',
+    q:'炭酸水素ナトリウムを加熱するとき、試験管の口を下げる理由を説明せよ。',
+    a:'発生した液体（水）が加熱部分に流れて試験管が割れるのを防ぐため。',
+    exp:'加熱により水・二酸化炭素・炭酸ナトリウムに分解される。口を下げると液体が加熱部に戻らない。' },
+  { id:'d02', cat:'化学', cls:'cat-chem',
+    q:'アンモニアの集め方とその理由を答えよ。',
+    a:'上方置換法。アンモニアは空気より密度が小さく、また水に非常に溶けやすいため。',
+    exp:'NH₃の分子量17＜空気の平均分子量29。水上置換は水溶性のため不適。' },
+  { id:'d03', cat:'化学', cls:'cat-chem',
+    q:'石灰石に塩酸を加えると何が発生するか。また、その確認方法は？',
+    a:'二酸化炭素（CO₂）。石灰水（水酸化カルシウム水溶液）を白濁させる。',
+    exp:'CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂。石灰水の白濁はCaCO₃の微粒子生成による。' },
+  { id:'d04', cat:'化学', cls:'cat-chem',
+    q:'鉄と硫黄の混合物を加熱してできる硫化鉄が、元の混合物と化学的に異なる点を2つ挙げよ。',
+    a:'①磁石に引き付けられない　②塩酸を加えると硫化水素（腐卵臭）が発生する（鉄＋塩酸では水素が発生）。',
+    exp:'化学変化により新しい物質が生成。混合物と化合物の違いの典型例。' },
+  { id:'d05', cat:'化学', cls:'cat-chem',
+    q:'電気分解で水を分解するとき、陰極・陽極でそれぞれ何が発生するか。体積比は？',
+    a:'陰極：水素（H₂）、陽極：酸素（O₂）。体積比は水素：酸素 ＝ 2:1。',
+    exp:'2H₂O → 2H₂ + O₂。水素は陰極（還元）・酸素は陽極（酸化）。' },
+  { id:'d06', cat:'化学', cls:'cat-chem',
+    q:'酸性・アルカリ性の水溶液に共通するイオンをそれぞれ答えよ。',
+    a:'酸性：水素イオン（H⁺）　アルカリ性：水酸化物イオン（OH⁻）。',
+    exp:'中和はH⁺ + OH⁻ → H₂O。指示薬の色変化でpHを判断する。' },
+  { id:'d07', cat:'化学', cls:'cat-chem',
+    q:'酸化銀を加熱すると何が生じるか。また、気体の確認方法は？',
+    a:'銀（Ag）と酸素（O₂）に分解される。気体は火のついた線香を近づけると激しく燃える。',
+    exp:'2Ag₂O → 4Ag + O₂。酸化銀の黒→銀の白への変色も確認ポイント。' },
+  { id:'d08', cat:'化学', cls:'cat-chem',
+    q:'食塩水は純物質か混合物か。その理由も述べよ。',
+    a:'混合物。食塩（NaCl）と水（H₂O）の2種類の物質が混ざっているため。',
+    exp:'沸点・融点が一定でないこと、蒸発によって食塩を取り出せることが根拠。' },
+
+  // 物理
+  { id:'d09', cat:'物理', cls:'cat-phys',
+    q:'凸レンズで焦点距離の2倍の位置に物体を置いたとき、像の位置・大きさを答えよ。',
+    a:'レンズの反対側、焦点距離の2倍の位置に、物体と同じ大きさの実像ができる。',
+    exp:'1/a + 1/b = 1/f。a=2fのときb=2f。倍率m=b/a=1。' },
+  { id:'d10', cat:'物理', cls:'cat-phys',
+    q:'直列回路と並列回路で、電流・電圧のそれぞれの性質を述べよ。',
+    a:'直列：電流は全体で同じ。電圧は各部品で分かれる。\n並列：電圧は全体で同じ。電流は各部品で分かれる。',
+    exp:'直列：V=V₁+V₂、I=I₁=I₂。並列：V=V₁=V₂、I=I₁+I₂。' },
+  { id:'d11', cat:'物理', cls:'cat-phys',
+    q:'音の高低・大小は、音波の何によって決まるか。',
+    a:'高低は振動数（Hz）で決まる（振動数が多いほど高音）。大小は振幅で決まる（振幅が大きいほど大きな音）。',
+    exp:'同じ高さで大きな音は振幅大・振動数同。同じ大きさで高い音は振動数大・振幅同。' },
+  { id:'d12', cat:'物理', cls:'cat-phys',
+    q:'重さ6Nの物体を2本の糸でつるしたとき、各糸の張力はいくらか（左右対称の場合）。',
+    a:'各糸の張力は3N。',
+    exp:'合力＝重力なので、左右対称では各糸が等しく重力を分担。F₁=F₂=6÷2=3N。' },
+  { id:'d13', cat:'物理', cls:'cat-phys',
+    q:'斜面上に置いた物体にはたらく重力の、斜面に平行な分力の求め方を説明せよ。',
+    a:'重力mg×sin(斜面の角度θ)。角度が大きいほど斜面に平行な力が大きくなる。',
+    exp:'斜面に垂直な分力はmgcosθ。合力（重力）を平行四辺形の法則で分解する。' },
+  { id:'d14', cat:'物理', cls:'cat-phys',
+    q:'電力（W）・電力量（J）の公式をそれぞれ答えよ。',
+    a:'電力P=VI（V：電圧、I：電流）。電力量W=Pt=VIt。',
+    exp:'1W=1J/s。電力量の単位はJまたはWh（1kWh=3.6×10⁶J）。' },
+
+  // 生物
+  { id:'d15', cat:'生物', cls:'cat-bio',
+    q:'双子葉類と単子葉類の茎の断面の維管束の並び方の違いを説明せよ。',
+    a:'双子葉類：維管束が輪状に規則正しく並ぶ。単子葉類：維管束が散在（ばらばらに分布）する。',
+    exp:'維管束＝道管（水・無機物の通路）＋師管（有機物の通路）。根の維管束配置も違う。' },
+  { id:'d16', cat:'生物', cls:'cat-bio',
+    q:'双子葉類と単子葉類の根の違いを説明せよ。',
+    a:'双子葉類：主根と側根がある。単子葉類：ひげ根（多数の細い根が広がる）。',
+    exp:'葉脈も違う：双子葉類は網状脈、単子葉類は平行脈。子葉の枚数でも見分けられる。' },
+  { id:'d17', cat:'生物', cls:'cat-bio',
+    q:'光合成に必要なものと生成物をそれぞれ答えよ。化学式も示せ。',
+    a:'必要：二酸化炭素（CO₂）・水（H₂O）・光エネルギー。生成物：ブドウ糖（C₆H₁₂O₆）・酸素（O₂）。',
+    exp:'6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂。葉緑体のクロロフィルが光を吸収。' },
+  { id:'d18', cat:'生物', cls:'cat-bio',
+    q:'セキツイ動物の5グループとその体温調節の違いを答えよ。',
+    a:'魚類・両生類・は虫類：変温動物。鳥類・哺乳類：恒温動物。',
+    exp:'恒温動物は体温を一定に保つ仕組みを持つ。外温動物とも呼ばれる変温動物は環境温度に依存。' },
+  { id:'d19', cat:'生物', cls:'cat-bio',
+    q:'だ液中のアミラーゼがデンプンを分解するとき、ヨウ素液・ベネジクト液の色変化は？',
+    a:'ヨウ素液：青紫色にならない（分解されたため）。ベネジクト液：加熱すると赤褐色の沈殿（麦芽糖が検出）。',
+    exp:'対照実験（水を加えたもの）と比較することが重要。酵素は特定の物質にのみ反応する。' },
+  { id:'d20', cat:'生物', cls:'cat-bio',
+    q:'細胞分裂の順序を答えよ（体細胞分裂）。',
+    a:'①核膜消失→②染色体が現れる→③染色体が細胞中央に並ぶ→④染色体が両極へ移動→⑤細胞質が分裂。',
+    exp:'ヒトの体細胞は通常46本（23対）の染色体を持つ。分裂後も染色体数は変わらない。' },
+  { id:'d21', cat:'生物', cls:'cat-bio',
+    q:'消化酵素ペプシン・アミラーゼ・リパーゼはそれぞれ何を分解するか。',
+    a:'ペプシン：タンパク質→ポリペプチド。アミラーゼ：デンプン→麦芽糖。リパーゼ：脂肪→脂肪酸＋グリセリン。',
+    exp:'胃液にペプシン（pH2の酸性環境で働く）。すい液に全種類。胆汁は酵素なく脂肪を乳化する。' },
+
+  // 地学
+  { id:'d22', cat:'地学', cls:'cat-geo',
+    q:'示準化石とは何か。また、その条件を2つ挙げよ。',
+    a:'特定の地質時代にのみ生存した生物の化石で、地層の年代推定に使われる。条件：①ある時代にだけ繁栄②広い地域に分布。',
+    exp:'例：三葉虫（古生代）・アンモナイト（中生代）・ビカリア（新生代）。' },
+  { id:'d23', cat:'地学', cls:'cat-geo',
+    q:'示相化石とは何か。示準化石との違いを含めて説明せよ。',
+    a:'地層が堆積した当時の環境（気候・水深など）を示す化石。示準化石が時代を示すのに対し、示相化石は環境を示す。',
+    exp:'例：サンゴ（暖かく浅い海）・シジミ（淡水か汽水）・ブナ（冷温帯の陸地）。' },
+  { id:'d24', cat:'地学', cls:'cat-geo',
+    q:'地震のP波とS波の違いを説明せよ。初期微動継続時間と震源距離の関係は？',
+    a:'P波：縦波（疎密波）、速い、固体・液体・気体を伝わる。S波：横波、遅い、固体のみ。初期微動継続時間は震源距離に比例する。',
+    exp:'初期微動：P波到達からS波到達まで。T=D×(1/vS−1/vP)。大森公式参照。' },
+  { id:'d25', cat:'地学', cls:'cat-geo',
+    q:'火成岩のうち、深成岩と火山岩の違いを組織（テクスチャ）で説明せよ。',
+    a:'深成岩：等粒状組織（大きな結晶がそろう）。地下深くでゆっくり冷え固まった。火山岩：斑状組織（斑晶と石基）。地表付近で急冷。',
+    exp:'深成岩例：花崗岩・閃緑岩・斑れい岩。火山岩例：流紋岩・安山岩・玄武岩。' },
+  { id:'d26', cat:'地学', cls:'cat-geo',
+    q:'天気図の等圧線について、低気圧と高気圧の風の向きを答えよ（北半球）。',
+    a:'低気圧：中心へ向かって反時計回りに吹き込む。高気圧：中心から時計回りに吹き出す。',
+    exp:'コリオリ力（地球の自転）により北半球では右に曲げられる。南半球では逆。' },
+  { id:'d27', cat:'地学', cls:'cat-geo',
+    q:'日本の夏と冬の気圧配置の特徴をそれぞれ答えよ。',
+    a:'夏：南高北低（太平洋高気圧が発達）、南東の季節風。冬：西高東低（シベリア高気圧）、北西の季節風。',
+    exp:'梅雨は北太平洋高気圧とオホーツク海高気圧がせめぎ合う停滞前線（梅雨前線）による。' },
+  { id:'d28', cat:'地学', cls:'cat-geo',
+    q:'地層の「不整合」とはどのような現象か。また何がわかるか。',
+    a:'下の地層が堆積・隆起・浸食された後、再び沈降して上の地層が堆積した境界面。大きな時間的ギャップがあることを示す。',
+    exp:'不整合面の上下で地層の傾きや種類が大きく異なることがある。侵食面・礫岩層が証拠。' },
+  { id:'d29', cat:'地学', cls:'cat-geo',
+    q:'月が満ち欠けする理由を説明せよ。また新月・満月・上弦の月の位置関係は？',
+    a:'月が地球の周りを公転し、太陽光が当たる面の見え方が変わるから。\n新月：太陽と同方向。満月：太陽の反対側。上弦：太陽の東90°。',
+    exp:'月の公転周期は約29.5日（朔望月）。月は自転と公転が同周期のため、常に同じ面を地球に向ける。' },
+  { id:'d30', cat:'地学', cls:'cat-geo',
+    q:'プレートテクトニクスにおいて、日本列島付近でのプレートの動きと地震・火山の関係を説明せよ。',
+    a:'海洋プレートが大陸プレートの下に沈み込む（沈降）。沈み込み帯で摩擦により巨大地震発生。プレートが溶けてマグマとなり火山が形成される。',
+    exp:'日本は4枚のプレートの境界に位置。太平洋プレート・フィリピン海プレートが沈み込む。' },
+];
+
+// ─── State ─────────────────────────────────────────────────────────────────
+const LS_CARDS    = 'sc_cards_v2';
+const LS_MASTERED = 'sc_mastered_v2';
+const LS_PREFS    = 'sc_prefs_v2';
+
+let cards = [];
+let mastered = new Set();
+let queue = [];
+let currentIdx = null;
+let flipped = false;
+let filter = 'all';
+let reviewOnly = false;
+let shuffleOn = true;
+let showAll = false;
+
+// ─── Load / Save ───────────────────────────────────────────────────────────
+function loadState() {
+  try {
+    const sc = localStorage.getItem(LS_CARDS);
+    cards = sc ? JSON.parse(sc) : JSON.parse(JSON.stringify(DEFAULT_CARDS));
+  } catch(e) { cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)); }
+  try {
+    const sm = localStorage.getItem(LS_MASTERED);
+    mastered = sm ? new Set(JSON.parse(sm)) : new Set();
+  } catch(e) { mastered = new Set(); }
+  try {
+    const sp = localStorage.getItem(LS_PREFS);
+    if (sp) {
+      const p = JSON.parse(sp);
+      filter = p.filter ?? 'all';
+      reviewOnly = p.reviewOnly ?? false;
+      shuffleOn = p.shuffleOn ?? true;
+      showAll = p.showAll ?? false;
+    }
+  } catch(e) {}
+}
+
+function saveCards()    { localStorage.setItem(LS_CARDS, JSON.stringify(cards)); }
+function saveMastered() { localStorage.setItem(LS_MASTERED, JSON.stringify([...mastered])); }
+function savePrefs()    {
+  localStorage.setItem(LS_PREFS, JSON.stringify({ filter, reviewOnly, shuffleOn, showAll }));
+}
+
+// ─── Queue Build ────────────────────────────────────────────────────────────
+function buildQueue() {
+  let pool = cards.filter(c => filter === 'all' || c.cat === filter);
+  if (reviewOnly) pool = pool.filter(c => !mastered.has(c.id));
+  if (pool.length === 0) { queue = []; currentIdx = null; return; }
+  const ids = pool.map(c => c.id);
+  if (shuffleOn) shuffleArr(ids);
+  queue = ids;
+  currentIdx = 0;
+}
+
+function shuffleArr(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+}
+
+// ─── Rendering ──────────────────────────────────────────────────────────────
+function render() {
+  updateProgress();
+  updateToggles();
+  updateFilter();
+  updateQueueInfo();
+  renderCard();
+  renderCardList();
+}
+
+function updateProgress() {
+  const pool = filter === 'all' ? cards : cards.filter(c => c.cat === filter);
+  const total = pool.length;
+  const ok = pool.filter(c => mastered.has(c.id)).length;
+  const pct = total ? Math.round(ok / total * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('pct-label').textContent = pct + '%';
+  document.getElementById('ok-count').textContent = ok;
+  document.getElementById('total-count').textContent = total;
+  document.getElementById('hdr-total').textContent = cards.length + ' cards';
+  document.getElementById('hdr-ok').textContent = mastered.size + ' 覚えた';
+}
+
+function updateQueueInfo() {
+  const pool = cards.filter(c => filter === 'all' || c.cat === filter);
+  const okCnt = pool.filter(c => mastered.has(c.id)).length;
+  const ngCnt = pool.length - okCnt;
+  const rem = queue.length - (currentIdx ?? 0);
+  document.getElementById('qi-rem').textContent = '残 ' + Math.max(0, rem) + ' 枚';
+  document.getElementById('qi-ok').textContent = '覚えた ' + okCnt;
+  document.getElementById('qi-ng').textContent = '要復習 ' + ngCnt;
+}
+
+function updateFilter() {
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === filter);
+  });
+}
+
+function updateToggles() {
+  toggle('btn-review-only', reviewOnly);
+  toggle('btn-shuffle', shuffleOn);
+  toggle('btn-show-all', showAll);
+}
+function toggle(id, on) {
+  const el = document.getElementById(id);
+  el.classList.toggle('on', on);
+  el.querySelector('.dot').style.background = on ? 'var(--cyan)' : 'var(--dim)';
+}
+
+function renderCard() {
+  const front = document.getElementById('card-front');
+  const back  = document.getElementById('card-back');
+  const wrap  = document.getElementById('card-wrap');
+  const jr    = document.getElementById('judge-row');
+
+  // Reset flip
+  wrap.classList.remove('flipped');
+  flipped = false;
+
+  if (currentIdx === null || queue.length === 0 || currentIdx >= queue.length) {
+    const allDone = !cards.filter(c => filter === 'all' || c.cat === filter)
+                          .filter(c => !mastered.has(c.id)).length;
+    front.innerHTML = `<div class="no-cards">${
+      allDone
+        ? '🎉 全カードを覚えました！<br><small style="color:var(--dim)">「最初から」で再挑戦</small>'
+        : 'カードがありません<br><small style="color:var(--dim)">フィルターや設定を確認してください</small>'
+    }</div>`;
+    back.innerHTML = '';
+    jr.classList.add('hidden');
+    return;
+  }
+
+  const card = cardById(queue[currentIdx]);
+  if (!card) { next(); return; }
+
+  const isMastered = mastered.has(card.id);
+  const badge = isMastered
+    ? `<span style="font-size:.6rem;color:var(--green);margin-left:8px;">✓ 覚えた</span>` : '';
+
+  front.className = `card-face card-front ${card.cls}`;
+  front.innerHTML = `
+    <div class="card-num">${currentIdx + 1} / ${queue.length}${badge}</div>
+    <div class="card-cat">${card.cat}</div>
+    <div class="card-q">${esc(card.q)}</div>
+    <div class="card-hint">タップ / クリックで答えを見る</div>
+  `;
+
+  const expHtml = card.exp
+    ? `<div class="card-exp"><strong>解説：</strong>${esc(card.exp)}</div>` : '';
+  back.className = `card-face card-back ${card.cls}`;
+  back.innerHTML = `
+    <div class="card-cat">${card.cat}</div>
+    <div class="card-a">${esc(card.a)}</div>
+    ${expHtml}
+  `;
+
+  jr.classList.toggle('hidden', !showAll && !flipped);
+  if (showAll) { wrap.classList.add('flipped'); flipped = true; jr.classList.remove('hidden'); }
+}
+
+function cardById(id) { return cards.find(c => c.id === id) || null; }
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>');
+}
+
+function renderCardList() {
+  const list = document.getElementById('card-list');
+  const pool = filter === 'all' ? cards : cards.filter(c => c.cat === filter);
+  if (!pool.length) { list.innerHTML = '<div style="color:var(--dim);font-size:.75rem;padding:8px">カードがありません</div>'; return; }
+  list.innerHTML = pool.map(c => {
+    const ok = mastered.has(c.id) ? '<span class="cli-ok">✓</span>' : '';
+    const catColor = { '生物':'var(--green)','地学':'var(--orange)','化学':'var(--cyan)','物理':'var(--purple)' }[c.cat] ?? 'var(--blue)';
+    return `<div class="card-list-item">
+      <span class="cli-cat" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}">${c.cat}</span>
+      <span class="cli-q">${esc(c.q)}</span>
+      ${ok}
+      <button class="cli-del" onclick="deleteCard('${c.id}')">削除</button>
+    </div>`;
+  }).join('');
+}
+
+// ─── Actions ────────────────────────────────────────────────────────────────
+function flipCard() {
+  const wrap = document.getElementById('card-wrap');
+  if (currentIdx === null || queue.length === 0 || currentIdx >= queue.length) return;
+  flipped = !flipped;
+  wrap.classList.toggle('flipped', flipped);
+  if (flipped) document.getElementById('judge-row').classList.remove('hidden');
+}
+
+function judge(ok) {
+  if (currentIdx === null || queue.length === 0) return;
+  const id = queue[currentIdx];
+  if (ok) {
+    mastered.add(id);
+    saveMastered();
+    toast('✓ 覚えた！');
+  } else {
+    mastered.delete(id);
+    saveMastered();
+    toast('△ まだ — 後でまた挑戦');
+  }
+  next();
+}
+
+function skip() { next(); }
+
+function next() {
+  if (currentIdx === null) return;
+  currentIdx++;
+  if (currentIdx >= queue.length) { currentIdx = queue.length; }
+  flipped = false;
+  render();
+}
+
+function setFilter(cat, btn) {
+  filter = cat;
+  savePrefs();
+  buildQueue();
+  render();
+}
+
+function toggleReviewOnly() {
+  reviewOnly = !reviewOnly;
+  savePrefs();
+  buildQueue();
+  render();
+}
+
+function toggleShuffle() {
+  shuffleOn = !shuffleOn;
+  savePrefs();
+  buildQueue();
+  render();
+}
+
+function toggleShowAll() {
+  showAll = !showAll;
+  savePrefs();
+  render();
+}
+
+function resetQueue() {
+  buildQueue();
+  render();
+  toast('最初からスタート！');
+}
+
+function resetMastered() {
+  if (!confirm('覚えた進捗をリセットしてもよいですか？')) return;
+  mastered = new Set();
+  saveMastered();
+  buildQueue();
+  render();
+  toast('進捗をリセットしました');
+}
+
+function addCard() {
+  const cat = document.getElementById('in-cat').value.trim();
+  const q   = document.getElementById('in-q').value.trim();
+  const a   = document.getElementById('in-a').value.trim();
+  const exp = document.getElementById('in-exp').value.trim();
+  if (!q || !a) { toast('問題文と答えを入力してください'); return; }
+  const clsMap = { '生物':'cat-bio','地学':'cat-geo','化学':'cat-chem','物理':'cat-phys' };
+  const newCard = {
+    id: 'u' + Date.now(),
+    cat, cls: clsMap[cat] ?? 'cat-chem', q, a, exp
+  };
+  cards.push(newCard);
+  saveCards();
+  document.getElementById('in-q').value = '';
+  document.getElementById('in-a').value = '';
+  document.getElementById('in-exp').value = '';
+  buildQueue();
+  render();
+  toast('カードを追加しました！');
+}
+
+function deleteCard(id) {
+  const card = cards.find(c => c.id === id);
+  if (!card) return;
+  if (!confirm(`「${card.q.slice(0,30)}...」を削除しますか？`)) return;
+  cards = cards.filter(c => c.id !== id);
+  mastered.delete(id);
+  saveCards();
+  saveMastered();
+  // rebuild queue removing this id
+  queue = queue.filter(qid => qid !== id);
+  if (currentIdx !== null && currentIdx >= queue.length) currentIdx = Math.max(0, queue.length - 1);
+  if (queue.length === 0) currentIdx = null;
+  render();
+  toast('削除しました');
+}
+
+// ─── Toast ──────────────────────────────────────────────────────────────────
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ─── Canvas BG ──────────────────────────────────────────────────────────────
+(function() {
+  const cv = document.getElementById('bg');
+  const cx = cv.getContext('2d');
+  let W, H, pts = [];
+  function resize() {
+    W = cv.width = window.innerWidth;
+    H = cv.height = window.innerHeight;
+  }
+  function initPts() {
+    pts = Array.from({length: 55}, () => ({
+      x: Math.random()*W, y: Math.random()*H,
+      vx:(Math.random()-.5)*.35, vy:(Math.random()-.5)*.35,
+      r: Math.random()*1.6+.4,
+      a: Math.random()*.5+.1
+    }));
+  }
+  function draw() {
+    cx.clearRect(0,0,W,H);
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0||p.x>W) p.vx*=-1;
+      if(p.y<0||p.y>H) p.vy*=-1;
+      cx.beginPath();
+      cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle = `rgba(0,180,255,${p.a})`;
+      cx.fill();
+    });
+    pts.forEach((p,i) => {
+      for(let j=i+1;j<pts.length;j++) {
+        const dx=p.x-pts[j].x, dy=p.y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<110) {
+          cx.beginPath();
+          cx.moveTo(p.x,p.y); cx.lineTo(pts[j].x,pts[j].y);
+          cx.strokeStyle = `rgba(0,180,255,${.07*(1-d/110)})`;
+          cx.lineWidth=.6; cx.stroke();
+        }
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); initPts(); });
+  resize(); initPts(); draw();
+})();
+
+// ─── Boot ───────────────────────────────────────────────────────────────────
+loadState();
+buildQueue();
+render();
+</script>
+</body>
+</html>
