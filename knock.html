@@ -3,225 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciLab 30本ノック</title>
+    <title>SciLab 120本ノック</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg:#060c1a; --bg2:#0a1628; --bg3:#0d1f3c;
-            --cyan:#00ffcc; --blue:#0088ff; --purple:#8800ff;
-            --green:#00ff64; --orange:#ff8800;
-            --text:#d0e8ff; --dim:#6888aa;
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{
+            --bg:#060c1a;--bg2:#0a1628;--bg3:#0d1f3c;
+            --cyan:#00ffcc;--blue:#0088ff;--purple:#8800ff;
+            --green:#00ff64;--orange:#ff8800;
+            --text:#d0e8ff;--dim:#6888aa;
         }
-        html,body { height:100%; background:var(--bg); color:var(--text);
-            font-family:'Segoe UI',system-ui,sans-serif; overflow-x:hidden; }
-        body::before { content:''; position:fixed; inset:0;
-            background: linear-gradient(rgba(0,136,255,.04) 1px,transparent 1px),
-                        linear-gradient(90deg,rgba(0,136,255,.04) 1px,transparent 1px);
-            background-size:48px 48px; pointer-events:none; z-index:0; }
-        body::after { content:''; position:fixed; inset:0;
+        html,body{height:100%;background:var(--bg);color:var(--text);
+            font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden;}
+        body::before{content:'';position:fixed;inset:0;
+            background:linear-gradient(rgba(0,136,255,.04) 1px,transparent 1px),
+                       linear-gradient(90deg,rgba(0,136,255,.04) 1px,transparent 1px);
+            background-size:48px 48px;pointer-events:none;z-index:0;}
+        body::after{content:'';position:fixed;inset:0;
             background:repeating-linear-gradient(0deg,transparent,transparent 2px,
                 rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
-            pointer-events:none; z-index:0; }
-        canvas#bg-cv { position:fixed; inset:0; z-index:0; pointer-events:none; }
-        .screen { position:relative; z-index:1; min-height:100vh; }
+            pointer-events:none;z-index:0;}
+        canvas#bg-cv{position:fixed;inset:0;z-index:0;pointer-events:none;}
+        .screen{position:relative;z-index:1;min-height:100vh;}
 
-        /* ═══ TOP ═══ */
-        #top-screen { display:flex; flex-direction:column; align-items:center;
-            justify-content:center; padding:40px 24px; }
-        .top-badge { font-size:.68rem; letter-spacing:.22em; color:var(--cyan);
-            border:1px solid rgba(0,255,204,.3); padding:4px 16px; border-radius:20px;
-            margin-bottom:22px; text-transform:uppercase;
-            animation:blink-border 3s ease-in-out infinite; }
-        @keyframes blink-border {
-            0%,100%{border-color:rgba(0,255,204,.3);box-shadow:none;}
-            50%{border-color:rgba(0,255,204,.7);box-shadow:0 0 10px rgba(0,255,204,.2);} }
-        .top-icon { font-size:5rem; margin-bottom:16px; animation:float 5s ease-in-out infinite;
-            filter:drop-shadow(0 0 18px rgba(0,255,204,.65)); }
-        .top-title { font-size:clamp(2.6rem,9vw,4.8rem); font-weight:900; letter-spacing:.15em;
+        /* ══ TOP ══ */
+        #top-screen{display:flex;flex-direction:column;align-items:center;
+            justify-content:center;padding:36px 20px;}
+        .top-badge{font-size:.67rem;letter-spacing:.22em;color:var(--cyan);
+            border:1px solid rgba(0,255,204,.3);padding:4px 16px;border-radius:20px;
+            margin-bottom:20px;text-transform:uppercase;
+            animation:blink-border 3s ease-in-out infinite;}
+        @keyframes blink-border{
+            0%,100%{border-color:rgba(0,255,204,.3);}
+            50%{border-color:rgba(0,255,204,.7);box-shadow:0 0 10px rgba(0,255,204,.2);}}
+        .top-icon{font-size:4.5rem;margin-bottom:14px;
+            animation:float 5s ease-in-out infinite;
+            filter:drop-shadow(0 0 18px rgba(0,255,204,.65));}
+        .top-title{font-size:clamp(2.4rem,8vw,4.4rem);font-weight:900;letter-spacing:.14em;
             background:linear-gradient(120deg,var(--cyan) 0%,var(--blue) 55%,var(--purple) 100%);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-            filter:drop-shadow(0 0 28px rgba(0,255,204,.4)); margin-bottom:4px; }
-        .top-knock { font-size:clamp(1rem,4vw,1.5rem); font-weight:900; color:var(--orange);
-            letter-spacing:.2em; margin-bottom:4px;
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+            filter:drop-shadow(0 0 26px rgba(0,255,204,.4));margin-bottom:4px;}
+        .top-knock{font-size:clamp(.95rem,3.5vw,1.4rem);font-weight:900;color:var(--orange);
+            letter-spacing:.2em;margin-bottom:4px;
             text-shadow:0 0 12px rgba(255,136,0,.5);
-            animation:blink-knock 2s ease-in-out infinite; }
-        @keyframes blink-knock {
+            animation:blink-knock 2s ease-in-out infinite;}
+        @keyframes blink-knock{
             0%,100%{text-shadow:0 0 10px rgba(255,136,0,.4);}
-            50%{text-shadow:0 0 26px rgba(255,136,0,.9);} }
-        .top-sub { font-size:.78rem; letter-spacing:.28em; color:var(--dim);
-            text-transform:uppercase; margin-bottom:28px; }
-        .top-stats { display:flex; gap:16px; margin-bottom:28px; }
-        .top-stat { text-align:center; background:rgba(0,136,255,.08);
-            border:1px solid rgba(0,136,255,.2); border-radius:10px; padding:12px 18px; }
-        .top-stat-num { font-size:1.7rem; font-weight:900; color:var(--cyan); }
-        .top-stat-lbl { font-size:.62rem; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; }
-        .top-desc { text-align:center; font-size:.9rem; color:var(--dim);
-            line-height:1.85; max-width:380px; margin-bottom:32px; }
-        .top-desc strong { color:var(--cyan); }
-        .start-btn { position:relative; padding:16px 56px; font-size:1.05rem; font-weight:700;
-            letter-spacing:.12em; color:#000d1a;
+            50%{text-shadow:0 0 26px rgba(255,136,0,.9);}}
+        .top-sub{font-size:.76rem;letter-spacing:.26em;color:var(--dim);
+            text-transform:uppercase;margin-bottom:28px;}
+
+        /* subject selector */
+        .mode-label{font-size:.7rem;letter-spacing:.15em;color:var(--dim);
+            text-transform:uppercase;margin-bottom:12px;}
+        .btn-all{width:100%;max-width:380px;padding:15px;margin-bottom:14px;
             background:linear-gradient(135deg,var(--cyan),var(--blue));
-            border:none; border-radius:4px; cursor:pointer; overflow:hidden;
-            transition:transform .2s,box-shadow .2s; text-transform:uppercase;
-            box-shadow:0 0 24px rgba(0,255,204,.4),0 0 48px rgba(0,136,255,.15); }
-        .start-btn::before { content:''; position:absolute; inset:0;
-            background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);
-            transform:translateX(-100%); transition:transform .5s; }
-        .start-btn:hover { transform:translateY(-3px) scale(1.02);
-            box-shadow:0 0 36px rgba(0,255,204,.6),0 0 70px rgba(0,136,255,.25); }
-        .start-btn:hover::before { transform:translateX(100%); }
-        .start-btn:active { transform:scale(.97); }
+            border:none;border-radius:8px;color:#000d1a;font-size:1rem;
+            font-weight:700;letter-spacing:.08em;cursor:pointer;
+            transition:transform .2s,box-shadow .2s;text-transform:uppercase;
+            box-shadow:0 0 20px rgba(0,255,204,.35);}
+        .btn-all:hover{transform:translateY(-2px);box-shadow:0 0 32px rgba(0,255,204,.55);}
+        .subj-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;
+            width:100%;max-width:380px;margin-bottom:28px;}
+        .sbtn{padding:14px 10px;border-radius:8px;font-size:.88rem;font-weight:700;
+            cursor:pointer;transition:all .2s;letter-spacing:.04em;text-align:center;}
+        .sbtn-chem{background:rgba(255,160,0,.1);color:#ffaa00;border:1px solid rgba(255,160,0,.35);}
+        .sbtn-phys{background:rgba(0,136,255,.1);color:#44aaff;border:1px solid rgba(0,136,255,.35);}
+        .sbtn-bio {background:rgba(0,255,100,.1);color:#44ff88;border:1px solid rgba(0,255,100,.35);}
+        .sbtn-earth{background:rgba(180,100,255,.1);color:#cc88ff;border:1px solid rgba(180,100,255,.35);}
+        .sbtn:hover{transform:translateY(-2px);filter:brightness(1.2);}
 
-        /* ═══ QUIZ ═══ */
-        #quiz-screen { display:none; flex-direction:column; }
-
-        .qhdr { padding:12px 16px 10px; background:rgba(6,12,26,.9);
+        /* ══ QUIZ ══ */
+        #quiz-screen{display:none;flex-direction:column;}
+        .qhdr{padding:11px 15px 9px;background:rgba(6,12,26,.9);
             border-bottom:1px solid rgba(0,136,255,.2);
-            backdrop-filter:blur(14px); position:sticky; top:0; z-index:10; }
-        .qhdr-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-        .qhdr-logo { font-size:.7rem; letter-spacing:.18em; color:var(--dim); text-transform:uppercase; }
-        .hdr-right { display:flex; align-items:center; gap:14px; }
-
-        .streak-wrap { display:flex; align-items:center; gap:4px; font-size:.85rem; font-weight:700; }
-        .streak-icon { font-size:1rem; }
-        .streak-num { color:var(--dim); transition:color .3s,text-shadow .3s; font-variant-numeric:tabular-nums; }
-        .streak-unit { font-size:.6rem; color:var(--dim); }
-        .streak-wrap.hot3 .streak-num { color:#ffd700; }
-        .streak-wrap.hot5 .streak-num { color:var(--orange); text-shadow:0 0 10px rgba(255,136,0,.6); }
-        .streak-wrap.hot10 .streak-num { color:#ff4400; text-shadow:0 0 18px rgba(255,68,0,.9);
-            animation:pulse-streak .5s ease-in-out infinite; }
-        @keyframes pulse-streak { 0%,100%{transform:scale(1);}50%{transform:scale(1.18);} }
-
-        .rp-display { display:flex; align-items:baseline; gap:3px; }
-        .rp-val { font-size:1.4rem; font-weight:900; color:var(--cyan); font-variant-numeric:tabular-nums; }
-        .rp-label { font-size:.62rem; color:var(--dim); letter-spacing:.1em; }
-
-        .gauge-wrap { width:100%; height:6px; background:rgba(255,255,255,.08); border-radius:3px; }
-        .gauge-bar { height:100%; width:0%;
-            background:linear-gradient(90deg,var(--blue),var(--cyan)); border-radius:3px;
+            backdrop-filter:blur(14px);position:sticky;top:0;z-index:10;}
+        .qhdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+        .qhdr-left{display:flex;align-items:center;gap:8px;}
+        .qhdr-logo{font-size:.68rem;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;}
+        .session-badge{font-size:.62rem;padding:2px 9px;border-radius:10px;
+            background:rgba(0,136,255,.12);border:1px solid rgba(0,136,255,.25);color:var(--dim);}
+        .hdr-right{display:flex;align-items:center;gap:12px;}
+        .streak-wrap{display:flex;align-items:center;gap:4px;font-size:.83rem;font-weight:700;}
+        .streak-icon{font-size:1rem;}
+        .streak-num{color:var(--dim);transition:color .3s;font-variant-numeric:tabular-nums;}
+        .streak-unit{font-size:.58rem;color:var(--dim);}
+        .streak-wrap.hot3 .streak-num{color:#ffd700;}
+        .streak-wrap.hot5 .streak-num{color:var(--orange);text-shadow:0 0 10px rgba(255,136,0,.6);}
+        .streak-wrap.hot10 .streak-num{color:#ff4400;text-shadow:0 0 18px rgba(255,68,0,.9);
+            animation:pulse-s .5s ease-in-out infinite;}
+        @keyframes pulse-s{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+        .rp-display{display:flex;align-items:baseline;gap:3px;}
+        .rp-val{font-size:1.35rem;font-weight:900;color:var(--cyan);font-variant-numeric:tabular-nums;}
+        .rp-label{font-size:.6rem;color:var(--dim);letter-spacing:.1em;}
+        .gauge-wrap{width:100%;height:5px;background:rgba(255,255,255,.08);border-radius:3px;}
+        .gauge-bar{height:100%;width:0%;
+            background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:3px;
             transition:width .7s cubic-bezier(.34,1.56,.64,1);
-            box-shadow:0 0 10px rgba(0,255,204,.5); }
-        .gauge-row { display:flex; justify-content:space-between;
-            margin-top:5px; font-size:.62rem; color:var(--dim); }
-
-        .prog-row { display:flex; justify-content:center; gap:10px; padding:8px 16px; }
-        .prog-chip { font-size:.7rem; padding:3px 13px; border-radius:20px;
-            background:rgba(0,136,255,.08); border:1px solid rgba(0,136,255,.2); color:var(--dim); }
-        .prog-chip.accent { border-color:rgba(0,255,204,.3); color:var(--cyan); }
-
-        .q-area { padding:16px 20px 8px; text-align:center; }
-        .q-cat { display:inline-block; padding:3px 15px; border-radius:20px;
-            font-size:.67rem; font-weight:700; letter-spacing:.13em;
-            text-transform:uppercase; margin-bottom:12px; }
-        .cat-chem  { background:rgba(255,160,0,.12); color:#ffaa00; border:1px solid rgba(255,160,0,.3); }
-        .cat-phys  { background:rgba(0,136,255,.12); color:#44aaff; border:1px solid rgba(0,136,255,.3); }
-        .cat-bio   { background:rgba(0,255,100,.12); color:#44ff88; border:1px solid rgba(0,255,100,.3); }
-        .cat-earth { background:rgba(180,100,255,.12); color:#cc88ff; border:1px solid rgba(180,100,255,.3); }
-
-        .q-text { font-size:clamp(.92rem,3vw,1.18rem); line-height:1.8;
-            color:var(--text); max-width:540px; margin:0 auto; }
-
-        .card-wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:14px 18px; }
-        .flip-card { width:100%; max-width:500px; height:200px; perspective:1200px; }
-        @media(min-width:600px){.flip-card{height:250px;}}
-
-        .flip-inner { position:relative; width:100%; height:100%;
-            transform-style:preserve-3d;
-            transition:transform .65s cubic-bezier(.4,0,.2,1); }
-        .flip-card.flipped .flip-inner { transform:rotateY(180deg); }
-
-        .flip-front,.flip-back { position:absolute; inset:0; backface-visibility:hidden;
-            border-radius:14px; display:flex; flex-direction:column;
-            align-items:center; justify-content:center; padding:22px; gap:7px; }
+            box-shadow:0 0 8px rgba(0,255,204,.5);}
+        .gauge-row{display:flex;justify-content:space-between;
+            margin-top:4px;font-size:.6rem;color:var(--dim);}
+        .prog-row{display:flex;justify-content:center;gap:10px;padding:8px 15px;}
+        .prog-chip{font-size:.7rem;padding:3px 12px;border-radius:20px;
+            background:rgba(0,136,255,.08);border:1px solid rgba(0,136,255,.2);color:var(--dim);}
+        .prog-chip.accent{border-color:rgba(0,255,204,.3);color:var(--cyan);}
+        .q-area{padding:15px 20px 8px;text-align:center;}
+        .q-cat{display:inline-block;padding:3px 14px;border-radius:20px;
+            font-size:.66rem;font-weight:700;letter-spacing:.12em;
+            text-transform:uppercase;margin-bottom:11px;}
+        .cat-chem{background:rgba(255,160,0,.12);color:#ffaa00;border:1px solid rgba(255,160,0,.3);}
+        .cat-phys{background:rgba(0,136,255,.12);color:#44aaff;border:1px solid rgba(0,136,255,.3);}
+        .cat-bio{background:rgba(0,255,100,.12);color:#44ff88;border:1px solid rgba(0,255,100,.3);}
+        .cat-earth{background:rgba(180,100,255,.12);color:#cc88ff;border:1px solid rgba(180,100,255,.3);}
+        .q-text{font-size:clamp(.9rem,2.8vw,1.15rem);line-height:1.8;
+            color:var(--text);max-width:540px;margin:0 auto;}
+        .card-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:12px 18px;}
+        .flip-card{width:100%;max-width:500px;height:195px;perspective:1200px;}
+        @media(min-width:600px){.flip-card{height:245px;}}
+        .flip-inner{position:relative;width:100%;height:100%;
+            transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1);}
+        .flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+        .flip-front,.flip-back{position:absolute;inset:0;backface-visibility:hidden;
+            border-radius:14px;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;padding:20px;gap:6px;}
         .flip-front::before,.flip-front::after,
-        .flip-back::before,.flip-back::after { content:''; position:absolute; width:18px; height:18px; }
-
-        .flip-front { background:var(--bg3); border:1px solid rgba(0,136,255,.3);
-            box-shadow:0 0 0 1px rgba(0,136,255,.07) inset,0 24px 60px rgba(0,0,0,.5); }
+        .flip-back::before,.flip-back::after{content:'';position:absolute;width:16px;height:16px;}
+        .flip-front{background:var(--bg3);border:1px solid rgba(0,136,255,.3);
+            box-shadow:0 0 0 1px rgba(0,136,255,.07) inset,0 24px 60px rgba(0,0,0,.5);}
         .flip-front::before{top:8px;left:8px;border-top:2px solid var(--blue);border-left:2px solid var(--blue);border-radius:2px 0 0 0;}
         .flip-front::after{bottom:8px;right:8px;border-bottom:2px solid var(--blue);border-right:2px solid var(--blue);border-radius:0 0 2px 0;}
-
-        .flip-back { background:linear-gradient(145deg,#04160a,#091e12);
+        .flip-back{background:linear-gradient(145deg,#04160a,#091e12);
             border:1px solid rgba(0,255,100,.38);
             box-shadow:0 0 0 1px rgba(0,255,100,.07) inset,0 24px 60px rgba(0,0,0,.5);
-            transform:rotateY(180deg); }
+            transform:rotateY(180deg);}
         .flip-back::before{top:8px;left:8px;border-top:2px solid var(--green);border-left:2px solid var(--green);border-radius:2px 0 0 0;}
         .flip-back::after{bottom:8px;right:8px;border-bottom:2px solid var(--green);border-right:2px solid var(--green);border-radius:0 0 2px 0;}
+        .front-icon{font-size:2.4rem;opacity:.2;}
+        .front-hint{font-size:.68rem;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;}
+        .back-label{font-size:.65rem;color:rgba(0,255,100,.6);letter-spacing:.18em;text-transform:uppercase;}
+        .back-answer{font-size:clamp(1.3rem,4.5vw,1.9rem);font-weight:900;
+            color:var(--green);text-shadow:0 0 22px rgba(0,255,100,.55);text-align:center;line-height:1.3;}
+        .back-exp{font-size:.77rem;color:#80b890;line-height:1.6;text-align:center;max-width:380px;}
+        .actions{padding:0 15px 22px;max-width:520px;margin:0 auto;
+            width:100%;display:flex;flex-direction:column;gap:9px;}
+        .btn-reveal{padding:13px;background:rgba(0,136,255,.1);
+            border:1px solid rgba(0,136,255,.45);border-radius:8px;
+            color:var(--blue);font-size:.93rem;font-weight:600;
+            letter-spacing:.06em;cursor:pointer;transition:all .2s;}
+        .btn-reveal:hover{background:rgba(0,136,255,.2);box-shadow:0 0 16px rgba(0,136,255,.3);}
+        .judge-row{display:none;gap:9px;}
+        .judge-row.show{display:flex;}
+        .btn-ok,.btn-ng{flex:1;padding:13px;border:none;border-radius:8px;
+            font-size:.93rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .2s;}
+        .btn-ok{background:linear-gradient(135deg,#007733,var(--green));color:#001a08;
+            box-shadow:0 0 12px rgba(0,255,100,.25);}
+        .btn-ok:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(0,255,100,.5);}
+        .btn-ng{background:linear-gradient(135deg,#990033,#ff0055);color:#1a0010;
+            box-shadow:0 0 12px rgba(255,0,80,.25);}
+        .btn-ng:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(255,0,80,.5);}
 
-        .front-icon { font-size:2.6rem; opacity:.2; }
-        .front-hint { font-size:.7rem; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; }
-        .back-label { font-size:.67rem; color:rgba(0,255,100,.6); letter-spacing:.18em; text-transform:uppercase; }
-        .back-answer { font-size:clamp(1.4rem,5vw,2rem); font-weight:900;
-            color:var(--green); text-shadow:0 0 22px rgba(0,255,100,.55); text-align:center; }
-        .back-exp { font-size:.78rem; color:#80b890; line-height:1.6; text-align:center; max-width:380px; }
+        /* effects */
+        .flash{position:fixed;inset:0;pointer-events:none;z-index:100;opacity:0;transition:opacity .08s;}
+        .flash.green{background:rgba(0,255,100,.09);}
+        .flash.red{background:rgba(255,0,80,.09);}
+        .flash.show{opacity:1;}
+        .combo-popup{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);
+            font-size:2rem;font-weight:900;pointer-events:none;z-index:200;text-align:center;
+            animation:combo-anim .85s ease-out forwards;}
+        @keyframes combo-anim{
+            0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}
+            30%{opacity:1;transform:translate(-50%,-58%) scale(1.1);}
+            70%{opacity:1;transform:translate(-50%,-66%) scale(1);}
+            100%{opacity:0;transform:translate(-50%,-76%) scale(.9);}}
+        .rp-popup{position:fixed;top:48px;right:18px;font-size:1.1rem;font-weight:900;
+            color:var(--cyan);text-shadow:0 0 12px var(--cyan);pointer-events:none;
+            animation:rp-anim .9s ease-out forwards;z-index:999;}
+        @keyframes rp-anim{
+            0%{opacity:0;transform:translateY(8px) scale(.7);}
+            30%{opacity:1;transform:translateY(-20px) scale(1.1);}
+            100%{opacity:0;transform:translateY(-55px) scale(1);}}
 
-        .actions { padding:0 16px 24px; max-width:520px; margin:0 auto;
-            width:100%; display:flex; flex-direction:column; gap:9px; }
-        .btn-reveal { padding:13px; background:rgba(0,136,255,.1);
-            border:1px solid rgba(0,136,255,.45); border-radius:8px;
-            color:var(--blue); font-size:.95rem; font-weight:600;
-            letter-spacing:.06em; cursor:pointer; transition:all .2s; }
-        .btn-reveal:hover{background:rgba(0,136,255,.2);box-shadow:0 0 18px rgba(0,136,255,.3);}
-        .judge-row { display:none; gap:9px; }
-        .judge-row.show { display:flex; }
-        .btn-ok,.btn-ng { flex:1; padding:13px; border:none; border-radius:8px;
-            font-size:.95rem; font-weight:700; cursor:pointer;
-            letter-spacing:.04em; transition:all .2s; }
-        .btn-ok{background:linear-gradient(135deg,#007733,var(--green));color:#001a08;box-shadow:0 0 14px rgba(0,255,100,.25);}
-        .btn-ok:hover{transform:translateY(-2px);box-shadow:0 0 26px rgba(0,255,100,.5);}
-        .btn-ng{background:linear-gradient(135deg,#990033,#ff0055);color:#1a0010;box-shadow:0 0 14px rgba(255,0,80,.25);}
-        .btn-ng:hover{transform:translateY(-2px);box-shadow:0 0 26px rgba(255,0,80,.5);}
-
-        /* flash */
-        .flash { position:fixed; inset:0; pointer-events:none; z-index:100;
-            opacity:0; transition:opacity .08s; }
-        .flash.green { background:rgba(0,255,100,.09); }
-        .flash.red   { background:rgba(255,0,80,.09); }
-        .flash.show  { opacity:1; }
-
-        /* combo popup */
-        .combo-popup { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%);
-            font-size:2.2rem; font-weight:900; pointer-events:none; z-index:200; text-align:center;
-            animation:combo-anim .85s ease-out forwards; }
-        @keyframes combo-anim {
-            0%  {opacity:0;transform:translate(-50%,-50%) scale(.5);}
-            30% {opacity:1;transform:translate(-50%,-58%) scale(1.1);}
-            70% {opacity:1;transform:translate(-50%,-66%) scale(1);}
-            100%{opacity:0;transform:translate(-50%,-75%) scale(.9);} }
-
-        /* RP popup */
-        .rp-popup { position:fixed; top:50px; right:20px; font-size:1.15rem; font-weight:900;
-            color:var(--cyan); text-shadow:0 0 12px var(--cyan); pointer-events:none;
-            animation:rp-anim .9s ease-out forwards; z-index:999; }
-        @keyframes rp-anim {
-            0%  {opacity:0;transform:translateY(8px) scale(.7);}
-            30% {opacity:1;transform:translateY(-20px) scale(1.1);}
-            100%{opacity:0;transform:translateY(-55px) scale(1);} }
-
-        /* ═══ RESULT ═══ */
-        #result-screen { display:none; flex-direction:column; align-items:center;
-            justify-content:center; padding:48px 24px; text-align:center; gap:10px; }
-        .res-icon { font-size:5rem; animation:float 4s ease-in-out infinite; }
-        .res-title { font-size:clamp(1.9rem,6vw,2.6rem); font-weight:900;
+        /* ══ RESULT ══ */
+        #result-screen{display:none;flex-direction:column;align-items:center;
+            justify-content:center;padding:44px 20px;text-align:center;gap:10px;}
+        .res-icon{font-size:5rem;animation:float 4s ease-in-out infinite;}
+        .res-title{font-size:clamp(1.8rem,6vw,2.5rem);font-weight:900;
             background:linear-gradient(120deg,var(--cyan),var(--blue));
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-        .res-stats { display:grid; grid-template-columns:1fr 1fr;
-            gap:10px; width:100%; max-width:360px; margin:14px 0; }
-        .res-stat { background:rgba(0,136,255,.08); border:1px solid rgba(0,136,255,.2);
-            border-radius:10px; padding:14px 10px; }
-        .res-stat-num { font-size:1.8rem; font-weight:900; color:var(--cyan); line-height:1; }
-        .res-stat-lbl { font-size:.63rem; color:var(--dim); letter-spacing:.1em;
-            text-transform:uppercase; margin-top:4px; }
-        .res-stars { font-size:2rem; letter-spacing:.2em; margin:4px 0; }
-        .res-msg { font-size:.88rem; color:var(--dim); line-height:1.75;
-            max-width:380px; margin:6px 0 18px; }
-        .btn-restart { padding:14px 46px;
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+        .res-stats{display:grid;grid-template-columns:1fr 1fr;
+            gap:10px;width:100%;max-width:360px;margin:12px 0;}
+        .res-stat{background:rgba(0,136,255,.08);border:1px solid rgba(0,136,255,.2);
+            border-radius:10px;padding:13px 10px;}
+        .res-stat-num{font-size:1.7rem;font-weight:900;color:var(--cyan);line-height:1;}
+        .res-stat-lbl{font-size:.62rem;color:var(--dim);letter-spacing:.1em;
+            text-transform:uppercase;margin-top:4px;}
+        .res-stars{font-size:1.9rem;letter-spacing:.2em;margin:4px 0;}
+        .res-msg{font-size:.87rem;color:var(--dim);line-height:1.75;max-width:380px;margin:5px 0 18px;}
+        .btn-restart{padding:13px 44px;
             background:linear-gradient(135deg,var(--cyan),var(--blue));
-            border:none; border-radius:6px; color:#000d1a; font-size:1rem;
-            font-weight:700; cursor:pointer; letter-spacing:.08em;
-            text-transform:uppercase; transition:all .2s; }
-        .btn-restart:hover{transform:translateY(-2px);box-shadow:0 0 26px rgba(0,255,204,.45);}
-
+            border:none;border-radius:6px;color:#000d1a;font-size:1rem;
+            font-weight:700;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .2s;}
+        .btn-restart:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(0,255,204,.45);}
         @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
     </style>
 </head>
@@ -229,40 +210,31 @@
 <canvas id="bg-cv"></canvas>
 <div class="flash" id="flash"></div>
 
-<!-- ═══ TOP ═══ -->
+<!-- ══ TOP ══ -->
 <div id="top-screen" class="screen">
     <div class="top-badge">⚗️ Science Lab Knock System</div>
     <div class="top-icon">🔬</div>
     <div class="top-title">SciLab</div>
-    <div class="top-knock">30本ノック</div>
-    <div class="top-sub">Intensive Drill · No Mercy · All Right</div>
-    <div class="top-stats">
-        <div class="top-stat">
-            <div class="top-stat-num">30</div>
-            <div class="top-stat-lbl">問</div>
-        </div>
-        <div class="top-stat">
-            <div class="top-stat-num">4</div>
-            <div class="top-stat-lbl">分野</div>
-        </div>
-        <div class="top-stat">
-            <div class="top-stat-num">∞</div>
-            <div class="top-stat-lbl">ループ</div>
-        </div>
+    <div class="top-knock">120本ノック</div>
+    <div class="top-sub">All Right · No Mercy · Full Drill</div>
+    <div class="mode-label">▶ 分野を選んでスタート</div>
+    <button class="btn-all" onclick="startQuiz('all')">⚡ &nbsp;全分野でスタート（120問）</button>
+    <div class="subj-grid">
+        <button class="sbtn sbtn-chem" onclick="startQuiz('化学')">⚗️ 化学<br><small>30問</small></button>
+        <button class="sbtn sbtn-phys" onclick="startQuiz('物理')">⚡ 物理<br><small>30問</small></button>
+        <button class="sbtn sbtn-bio"  onclick="startQuiz('生物')">🌿 生物<br><small>30問</small></button>
+        <button class="sbtn sbtn-earth" onclick="startQuiz('地学')">🌍 地学<br><small>30問</small></button>
     </div>
-    <p class="top-desc">
-        <strong>全問マスターするまで終わらない！</strong><br>
-        間違えたカードは何度でも再出題。<br>
-        3連続でコンボボーナスを狙え！
-    </p>
-    <button class="start-btn" onclick="startQuiz()">⚡ &nbsp;ノック開始</button>
 </div>
 
-<!-- ═══ QUIZ ═══ -->
+<!-- ══ QUIZ ══ -->
 <div id="quiz-screen" class="screen">
     <div class="qhdr">
         <div class="qhdr-top">
-            <span class="qhdr-logo">⚗️ SciLab Knock</span>
+            <div class="qhdr-left">
+                <span class="qhdr-logo">⚗️ SciLab</span>
+                <span class="session-badge" id="session-badge">全分野</span>
+            </div>
             <div class="hdr-right">
                 <div class="streak-wrap" id="streak-wrap">
                     <span class="streak-icon">🔥</span>
@@ -275,25 +247,20 @@
                 </div>
             </div>
         </div>
-        <div class="gauge-wrap">
-            <div class="gauge-bar" id="gauge-bar"></div>
-        </div>
+        <div class="gauge-wrap"><div class="gauge-bar" id="gauge-bar"></div></div>
         <div class="gauge-row">
             <span>マスター進捗</span>
-            <span id="gauge-pct">0 / 30</span>
+            <span id="gauge-pct">0 / 0</span>
         </div>
     </div>
-
     <div class="prog-row">
-        <span class="prog-chip" id="prog-chip">残り 30問</span>
+        <span class="prog-chip" id="prog-chip">残り 0問</span>
         <span class="prog-chip accent" id="correct-chip">✓ 正解 0</span>
     </div>
-
     <div class="q-area">
         <div class="q-cat" id="q-cat"></div>
         <p class="q-text" id="q-text"></p>
     </div>
-
     <div class="card-wrap">
         <div class="flip-card" id="flip-card">
             <div class="flip-inner">
@@ -309,7 +276,6 @@
             </div>
         </div>
     </div>
-
     <div class="actions">
         <button class="btn-reveal" id="btn-reveal" onclick="reveal()">🔍 &nbsp;答えを見る</button>
         <div class="judge-row" id="judge-row">
@@ -319,169 +285,519 @@
     </div>
 </div>
 
-<!-- ═══ RESULT ═══ -->
+<!-- ══ RESULT ══ -->
 <div id="result-screen" class="screen">
     <div class="res-icon">🏆</div>
     <div class="res-title">全問マスター！</div>
     <div class="res-stars" id="res-stars"></div>
     <div class="res-stats">
-        <div class="res-stat">
-            <div class="res-stat-num" id="res-rp">0</div>
-            <div class="res-stat-lbl">総 RP</div>
-        </div>
-        <div class="res-stat">
-            <div class="res-stat-num" id="res-acc">0%</div>
-            <div class="res-stat-lbl">正答率</div>
-        </div>
-        <div class="res-stat">
-            <div class="res-stat-num" id="res-streak">0</div>
-            <div class="res-stat-lbl">最大連続</div>
-        </div>
-        <div class="res-stat">
-            <div class="res-stat-num" id="res-total">0</div>
-            <div class="res-stat-lbl">総解答数</div>
-        </div>
+        <div class="res-stat"><div class="res-stat-num" id="res-rp">0</div><div class="res-stat-lbl">総 RP</div></div>
+        <div class="res-stat"><div class="res-stat-num" id="res-acc">0%</div><div class="res-stat-lbl">正答率</div></div>
+        <div class="res-stat"><div class="res-stat-num" id="res-streak">0</div><div class="res-stat-lbl">最大連続</div></div>
+        <div class="res-stat"><div class="res-stat-num" id="res-total">0</div><div class="res-stat-lbl">総解答数</div></div>
     </div>
     <p class="res-msg" id="res-msg"></p>
     <button class="btn-restart" onclick="resetQuiz()">🔬 &nbsp;もう一度挑戦</button>
 </div>
 
 <script>
-// ── DATA ────────────────────────────────────────────────────────────────────
-const CARDS = [
-    // 化学
-    {cat:'化学',cls:'cat-chem',
-     q:'銅4.0gを完全に加熱したとき、結びつく酸素の最大質量は何gか？',
-     a:'1.0g',
-     exp:'銅：酸素＝4：1の質量比。多摩科技志望なら一瞬で解けるように！'},
-    {cat:'化学',cls:'cat-chem',
-     q:'鉄と硫黄が化合してできる物質の名前は何か？',
-     a:'硫化鉄',
-     exp:'化合すると磁石に引きつけられなくなる。元の物質とは全く異なる性質になる。'},
-    {cat:'化学',cls:'cat-chem',
-     q:'水を電気分解すると、陰極（－極）に発生する気体は何か？',
-     a:'水素',
-     exp:'水素：酸素＝2：1の体積比で発生。水素は陰極、酸素は陽極に集まる。'},
-    {cat:'化学',cls:'cat-chem',
-     q:'炭酸水素ナトリウムを加熱したとき発生する気体は何か？',
-     a:'二酸化炭素',
-     exp:'加熱すると炭酸ナトリウム・水・二酸化炭素に分解される（熱分解）。'},
-    {cat:'化学',cls:'cat-chem',
-     q:'塩酸（HCl水溶液）に亜鉛を入れたとき発生する気体は何か？',
-     a:'水素',
-     exp:'火をつけると「ポン」と音を立てて燃える。気体の中で最も軽い。'},
-    {cat:'化学',cls:'cat-chem',
-     q:'酸化銅を炭素粉末と混ぜて加熱すると、銅と共に発生する気体は何か？',
-     a:'二酸化炭素',
-     exp:'酸化銅（CuO）から酸素が炭素に奪われる。これを「還元」という。'},
-    {cat:'化学',cls:'cat-chem',
-     q:'原子の中心にある、陽子と中性子からなる部分を何というか？',
-     a:'原子核',
-     exp:'電子は原子核の周りを回っている。陽子の数＝原子番号＝元素の種類を決める。'},
-    {cat:'化学',cls:'cat-chem',
-     q:'アルカリ性の水溶液に共通して含まれるイオンは何か？',
-     a:'水酸化物イオン（OH⁻）',
-     exp:'酸性はH⁺（水素イオン）、アルカリ性はOH⁻が多い。中和で水（H₂O）が生成。'},
-    // 物理
-    {cat:'物理',cls:'cat-phys',
-     q:'回路に流れる電流を大きくするには、抵抗をどうすればよいか？',
-     a:'小さくする',
-     exp:'オームの法則 V=IR より I=V/R。電圧一定なら電流と抵抗は反比例。'},
-    {cat:'物理',cls:'cat-phys',
-     q:'10Ωの抵抗に2Aの電流が流れているとき、かかる電圧は何Vか？',
-     a:'20V',
-     exp:'V=IR=10×2=20V。オームの法則は必ず一瞬で使えるようにしよう。'},
-    {cat:'物理',cls:'cat-phys',
-     q:'質量100gの物体にはたらく重力は何Nか？（100g＝1Nとする）',
-     a:'1N',
-     exp:'地球上では100g≈1N。質量（kg）と重力（N）は単位が異なる。'},
-    {cat:'物理',cls:'cat-phys',
-     q:'凸レンズの焦点距離の2倍の位置に物体を置くとき、できる実像の大きさは？',
-     a:'物体と同じ大きさ',
-     exp:'2fの位置では同じ大きさの倒立実像が、レンズの反対側2fの位置にできる。'},
-    {cat:'物理',cls:'cat-phys',
-     q:'音が空気中を伝わる速さはおよそ何m/sか？',
-     a:'約340m/s',
-     exp:'光の速さは約30万km/s。雷のとき光の後に音が聞こえるのはこの差のため。'},
-    {cat:'物理',cls:'cat-phys',
-     q:'コイルと磁石の相対運動で電流を発生させる現象を何というか？',
-     a:'電磁誘導',
-     exp:'発電機の原理。コイル内の磁界が変化すると誘導電流が流れる。'},
-    {cat:'物理',cls:'cat-phys',
-     q:'並列回路では、各区間にかかる電圧はどうなるか？',
-     a:'電源電圧と等しい（すべて同じ）',
-     exp:'並列は電圧が共通、直列は電流が共通。家庭のコンセントは並列つなぎ。'},
-    {cat:'物理',cls:'cat-phys',
-     q:'摩擦・空気抵抗のない斜面を下る物体の速さは時間とともにどうなるか？',
-     a:'一定の割合で速くなる',
-     exp:'重力加速度による等加速度運動。速さは時間に比例して増加する。'},
-    // 生物
-    {cat:'生物',cls:'cat-bio',
-     q:'顕微鏡で対物レンズを倍率の高いものに変えたとき、視野の明るさはどうなるか？',
-     a:'暗くなる',
-     exp:'倍率を上げると視野が狭くなり、入ってくる光の量が減る。'},
-    {cat:'生物',cls:'cat-bio',
-     q:'植物細胞で光合成が行われる、緑色の粒を何というか？',
-     a:'葉緑体',
-     exp:'CO₂＋H₂O→有機物＋O₂の反応を光エネルギーを使って行う。'},
-    {cat:'生物',cls:'cat-bio',
-     q:'葉の表面にある気体と水の出入り口を何というか？',
-     a:'気孔',
-     exp:'葉の裏に多い。光合成でCO₂を取り込みO₂を出す。蒸散もここから行われる。'},
-    {cat:'生物',cls:'cat-bio',
-     q:'だ液に含まれ、デンプンを麦芽糖に分解する消化酵素は何か？',
-     a:'アミラーゼ',
-     exp:'消化酵素は温度とpHの影響を受ける。だ液は中性～弱アルカリ性で働く。'},
-    {cat:'生物',cls:'cat-bio',
-     q:'細胞内でエネルギー（ATP）をつくり出す場所はどこか？',
-     a:'ミトコンドリア',
-     exp:'有機物＋O₂→CO₂＋H₂O＋エネルギー。これが細胞呼吸（内呼吸）。'},
-    {cat:'生物',cls:'cat-bio',
-     q:'遺伝の法則（優性の法則・分離の法則）を発見した科学者は誰か？',
-     a:'メンデル',
-     exp:'エンドウ豆を使った実験で法則を発見。「遺伝学の父」とも呼ばれる。'},
-    {cat:'生物',cls:'cat-bio',
-     q:'脊椎動物のうち、体温が一定の恒温動物は哺乳類と何類か？',
-     a:'鳥類',
-     exp:'魚類・両生類・爬虫類は変温動物。恒温動物は鳥類と哺乳類の2グループのみ。'},
-    // 地学
-    {cat:'地学',cls:'cat-earth',
-     q:'地球の表面を十数枚に分けて覆っている岩盤を何というか？',
-     a:'プレート',
-     exp:'年間数cmずつ移動し、境界でぶつかり合うことで地震・火山が発生する。'},
-    {cat:'地学',cls:'cat-earth',
-     q:'地震波のP波とS波のうち、より速く伝わるのはどちらか？',
-     a:'P波',
-     exp:'P波（縦波）が先に到達→初期微動。S波（横波）が後→主要動。P波は固体・液体を伝わる。'},
-    {cat:'地学',cls:'cat-earth',
-     q:'日本の天気が西から東へ変わりやすい主な原因は何か？',
-     a:'偏西風',
-     exp:'中緯度帯（日本上空）では常に西→東へ偏西風が吹いており、低気圧・高気圧も東へ移動する。'},
-    {cat:'地学',cls:'cat-earth',
-     q:'暖気が寒気の上にゆっくり乗り上げ、広い範囲に弱い雨をもたらす前線は何か？',
-     a:'温暖前線',
-     exp:'前線の東側に広い雨域。通過後は気温が上昇する。天気図では半円の記号で表す。'},
-    {cat:'地学',cls:'cat-earth',
-     q:'地層の中に残された生物の遺骸や生活の痕跡を何というか？',
-     a:'化石',
-     exp:'示準化石は地層の年代を知る手がかり。示相化石は堆積した環境を知る手がかり。'},
-    {cat:'地学',cls:'cat-earth',
-     q:'月が満月から次の満月になるまでの周期は約何日か？',
-     a:'約29.5日',
-     exp:'これを「朔望月」という。月の自転・公転周期は同じ（約27.3日）で、常に同じ面が地球を向く。'},
-    {cat:'地学',cls:'cat-earth',
-     q:'太陽系で最も大きな惑星はどれか？',
-     a:'木星',
-     exp:'直径は地球の約11倍。大赤斑（巨大な嵐）が有名。ガス惑星の代表格。'},
-];
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const ALL_CARDS = [
+// ━━ 化学 30問 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{cat:'化学',cls:'cat-chem',
+ q:'銅4.0gを完全に加熱したとき、結びつく酸素の最大質量は何gか？',
+ a:'1.0g',
+ exp:'銅：酸素＝4：1の質量比。4.0×(1/4)=1.0g。多摩科技志望なら一瞬で解こう！'},
+{cat:'化学',cls:'cat-chem',
+ q:'鉄と硫黄が化合してできる物質の名前は何か？',
+ a:'硫化鉄',
+ exp:'化合後は磁石に引きつけられない。塩酸を加えると硫化水素（腐卵臭）が発生する。'},
+{cat:'化学',cls:'cat-chem',
+ q:'水を電気分解すると、陰極（－極）に発生する気体は何か？',
+ a:'水素',
+ exp:'水素：酸素＝2：1の体積比。陰極(－)→水素、陽極(＋)→酸素。'},
+{cat:'化学',cls:'cat-chem',
+ q:'炭酸水素ナトリウムを加熱すると生成する物質を3つ答えよ',
+ a:'炭酸ナトリウム・水・二酸化炭素',
+ exp:'2NaHCO₃ → Na₂CO₃ + H₂O + CO₂。生成した水が試験管の口に付く。'},
+{cat:'化学',cls:'cat-chem',
+ q:'塩酸（HCl水溶液）に亜鉛を入れたとき発生する気体は何か？',
+ a:'水素',
+ exp:'Zn + 2HCl → ZnCl₂ + H₂↑。火をつけると「ポン」と音を立てて燃える。'},
+{cat:'化学',cls:'cat-chem',
+ q:'酸化銅を炭素粉末と混ぜて加熱すると、銅と共に発生する気体は何か？',
+ a:'二酸化炭素',
+ exp:'2CuO + C → 2Cu + CO₂。酸化銅が還元され、炭素が酸化される（酸化還元）。'},
+{cat:'化学',cls:'cat-chem',
+ q:'原子の中心にある、陽子と中性子からなる部分を何というか？',
+ a:'原子核',
+ exp:'電子は原子核の外側に存在する。陽子の数＝原子番号＝元素の種類を決める。'},
+{cat:'化学',cls:'cat-chem',
+ q:'アルカリ性の水溶液に共通して含まれるイオンは何か？',
+ a:'水酸化物イオン（OH⁻）',
+ exp:'酸性はH⁺が多い。中和でH⁺＋OH⁻→H₂O（水）が生成する。'},
+{cat:'化学',cls:'cat-chem',
+ q:'食塩（NaCl）が水に溶けて電離するとき生じる2種類のイオンは？',
+ a:'Na⁺（ナトリウムイオン）とCl⁻（塩化物イオン）',
+ exp:'NaCl → Na⁺ + Cl⁻。電解質は水に溶けると電離して電流を流す。'},
+{cat:'化学',cls:'cat-chem',
+ q:'塩酸と水酸化ナトリウム水溶液を混ぜたとき起きる反応を何というか？',
+ a:'中和',
+ exp:'HCl + NaOH → NaCl + H₂O。酸とアルカリが反応して塩と水が生成する。'},
+{cat:'化学',cls:'cat-chem',
+ q:'物質が酸素と結びつく化学変化を何というか？',
+ a:'酸化',
+ exp:'鉄が錆びる（遅い酸化）・燃焼（激しい酸化）などがある。'},
+{cat:'化学',cls:'cat-chem',
+ q:'酸化物から酸素が奪われる化学変化を何というか？',
+ a:'還元',
+ exp:'酸化と還元は必ず同時に起こる（酸化還元反応）。'},
+{cat:'化学',cls:'cat-chem',
+ q:'溶液100gに溶質20gが溶けているとき、質量パーセント濃度は何%か？',
+ a:'20%',
+ exp:'質量パーセント濃度＝溶質÷溶液×100＝20÷100×100＝20%。'},
+{cat:'化学',cls:'cat-chem',
+ q:'温度による溶解度の差を利用して溶質を取り出す操作を何というか？',
+ a:'再結晶',
+ exp:'高温で溶かし冷却すると、溶けきれなくなった分が結晶として析出する。'},
+{cat:'化学',cls:'cat-chem',
+ q:'有機物を完全燃焼させると必ず発生する物質を2つ答えよ',
+ a:'二酸化炭素と水（水蒸気）',
+ exp:'有機物には炭素Cと水素Hが含まれるため、CO₂とH₂Oが必ず生成する。'},
+{cat:'化学',cls:'cat-chem',
+ q:'化学変化の前後で、物質全体の質量は変わらない。この法則を何というか？',
+ a:'質量保存の法則',
+ exp:'原子の種類と数は変化しないため。フランスのラボアジエが発見。'},
+{cat:'化学',cls:'cat-chem',
+ q:'BTB溶液は酸性で何色に変わるか？',
+ a:'黄色',
+ exp:'中性：緑色、アルカリ性：青色。「酸→黄、アルカリ→青」と覚えよう。'},
+{cat:'化学',cls:'cat-chem',
+ q:'鉄を塩酸に溶かしたとき発生する気体は何か？',
+ a:'水素',
+ exp:'Fe + 2HCl → FeCl₂ + H₂↑。金属＋酸で水素が発生するパターンを押さえよう。'},
+{cat:'化学',cls:'cat-chem',
+ q:'水溶液に電流を流せる溶質を何というか？',
+ a:'電解質',
+ exp:'食塩・塩酸・水酸化Naは電解質。砂糖・エタノールは非電解質（電流が流れない）。'},
+{cat:'化学',cls:'cat-chem',
+ q:'原子が電子を得てマイナスの電気を帯びたものを何というか？',
+ a:'陰イオン',
+ exp:'電子を失ったものが陽イオン（例：Na⁺）。得たものが陰イオン（例：Cl⁻）。'},
+{cat:'化学',cls:'cat-chem',
+ q:'化学変化でも分解されない、物質を構成する最小の粒子は何か？',
+ a:'原子',
+ exp:'元素記号で表す（H・O・C・Fe・Cuなど）。現在118種類の元素が知られている。'},
+{cat:'化学',cls:'cat-chem',
+ q:'原子が複数個結びついてできた粒子（例：H₂・O₂・H₂O）を何というか？',
+ a:'分子',
+ exp:'金属や食塩（NaCl）は分子をつくらない。分子の種類は化学式で表す。'},
+{cat:'化学',cls:'cat-chem',
+ q:'物質が水に溶けて陽イオンと陰イオンに分かれることを何というか？',
+ a:'電離',
+ exp:'HCl → H⁺ + Cl⁻（塩酸の電離）。電離するから電流を流せる。'},
+{cat:'化学',cls:'cat-chem',
+ q:'亜鉛板と銅板を希硫酸に入れてつないだ電池の＋極はどちらか？',
+ a:'銅板',
+ exp:'亜鉛がイオンになって溶けながら電子を放出（－極）。銅板が＋極になる。'},
+{cat:'化学',cls:'cat-chem',
+ q:'マグネシウム3.0gを完全に酸化すると、結びつく酸素は何gか？（Mg：O＝3：2）',
+ a:'2.0g',
+ exp:'3.0g×(2/3)＝2.0g。できる酸化マグネシウムは3.0＋2.0＝5.0g。'},
+{cat:'化学',cls:'cat-chem',
+ q:'水の電気分解で、陽極（＋極）に発生する気体は何か？',
+ a:'酸素',
+ exp:'酸素：水素＝1：2の体積比。陽極(＋)→酸素、陰極(－)→水素。'},
+{cat:'化学',cls:'cat-chem',
+ q:'酸性の水溶液に共通して含まれるイオンは何か？',
+ a:'水素イオン（H⁺）',
+ exp:'H⁺の濃度が高いほど強い酸性。pH7未満が酸性、7以上がアルカリ性。'},
+{cat:'化学',cls:'cat-chem',
+ q:'石灰水を白く濁らせる気体は何か？',
+ a:'二酸化炭素（CO₂）',
+ exp:'CO₂ + Ca(OH)₂ → CaCO₃↓ + H₂O。炭酸カルシウムの白色沈殿が生じる。'},
+{cat:'化学',cls:'cat-chem',
+ q:'炭酸ナトリウム水溶液に塩酸を加えたとき発生する気体は何か？',
+ a:'二酸化炭素',
+ exp:'Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂↑。石灰水に通すと白濁する。'},
+{cat:'化学',cls:'cat-chem',
+ q:'鉄と硫黄の混合物（化合前）に磁石を近づけると、鉄はどうなるか？',
+ a:'磁石に引きつけられる',
+ exp:'混合物は元の物質の性質を保つ。化合（硫化鉄）後は引きつけられなくなる。'},
 
-// ── PARTICLES ────────────────────────────────────────────────────────────────
+// ━━ 物理 30問 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{cat:'物理',cls:'cat-phys',
+ q:'回路に流れる電流を大きくするには、抵抗をどうすればよいか？',
+ a:'小さくする',
+ exp:'V＝IR より I＝V/R。電圧一定なら電流と抵抗は反比例。'},
+{cat:'物理',cls:'cat-phys',
+ q:'10Ωの抵抗に2Aの電流が流れているとき、かかる電圧は何Vか？',
+ a:'20V',
+ exp:'V＝IR＝10×2＝20V。オームの法則（V＝IR）は必ず使えるようにしよう。'},
+{cat:'物理',cls:'cat-phys',
+ q:'質量100gの物体にはたらく重力は何Nか？（100g＝1N）',
+ a:'1N',
+ exp:'地球上では100g≈1N。重力[N]＝質量[g]÷100で計算。'},
+{cat:'物理',cls:'cat-phys',
+ q:'凸レンズの焦点距離の2倍の位置に物体を置くと、できる実像の大きさは？',
+ a:'物体と同じ大きさ',
+ exp:'2fの位置では倒立で物体と同サイズの実像が反対側の2fにできる。'},
+{cat:'物理',cls:'cat-phys',
+ q:'音が空気中を伝わる速さはおよそ何m/sか？',
+ a:'約340m/s',
+ exp:'光の速さは約30万km/s。雷の音が遅れて聞こえるのはこの速さの差のため。'},
+{cat:'物理',cls:'cat-phys',
+ q:'コイルと磁石の相対運動で電流が発生する現象を何というか？',
+ a:'電磁誘導',
+ exp:'発電機の原理。コイル内の磁界が変化すると誘導電流が流れる。'},
+{cat:'物理',cls:'cat-phys',
+ q:'並列回路では、各枝にかかる電圧はどうなるか？',
+ a:'電源電圧と等しい（すべて同じ）',
+ exp:'並列は電圧が共通、直列は電流が共通。家庭のコンセントは並列つなぎ。'},
+{cat:'物理',cls:'cat-phys',
+ q:'摩擦・空気抵抗のない斜面を下る物体の速さは時間とともにどうなるか？',
+ a:'一定の割合で速くなる',
+ exp:'重力加速度による等加速度運動。速さは時間に比例して増加する。'},
+{cat:'物理',cls:'cat-phys',
+ q:'電流が磁界から力を受ける現象を利用した装置は何か？',
+ a:'電動機（モーター）',
+ exp:'電磁誘導を利用するのは発電機。モーターと発電機は逆の関係。'},
+{cat:'物理',cls:'cat-phys',
+ q:'10Nの力で物体を2m動かしたとき、した仕事は何Jか？',
+ a:'20J',
+ exp:'仕事[J]＝力[N]×距離[m]＝10×2＝20J。'},
+{cat:'物理',cls:'cat-phys',
+ q:'光が鏡などで跳ね返る現象を何というか？また入射角と反射角の関係は？',
+ a:'反射。入射角＝反射角',
+ exp:'反射の法則。光・音・水面波すべてに成り立つ。'},
+{cat:'物理',cls:'cat-phys',
+ q:'光が異なる物質の境界面で曲がる現象を何というか？',
+ a:'屈折',
+ exp:'空気→ガラスでは法線に近づく方向に曲がる。凸レンズの集光もこの原理。'},
+{cat:'物理',cls:'cat-phys',
+ q:'直列回路に2Ωと3Ωをつないだとき、合成抵抗は何Ωか？',
+ a:'5Ω',
+ exp:'直列の合成抵抗：R合＝R₁＋R₂＝2＋3＝5Ω。'},
+{cat:'物理',cls:'cat-phys',
+ q:'並列回路に4Ωと4Ωをつないだとき、合成抵抗は何Ωか？',
+ a:'2Ω',
+ exp:'1/R合＝1/4＋1/4＝1/2 → R合＝2Ω。並列は合成抵抗が各抵抗より小さくなる。'},
+{cat:'物理',cls:'cat-phys',
+ q:'電力500Wの器具を2時間使用したとき、電力量は何Whか？',
+ a:'1000Wh（1kWh）',
+ exp:'電力量[Wh]＝電力[W]×時間[h]＝500×2＝1000Wh。'},
+{cat:'物理',cls:'cat-phys',
+ q:'凸レンズで物体が焦点の内側にあるとき、見える像を何というか？',
+ a:'虚像',
+ exp:'正立・拡大。スクリーンに映せない。ルーペ（虫眼鏡）の原理。'},
+{cat:'物理',cls:'cat-phys',
+ q:'自由落下する物体は、毎秒約何m/sずつ速くなるか？',
+ a:'約9.8m/s（≈10m/s）',
+ exp:'これを重力加速度（g）という。g≈9.8m/s²≈10m/s²で計算。'},
+{cat:'物理',cls:'cat-phys',
+ q:'水圧は深さが増すとどうなるか？',
+ a:'大きくなる（深さに比例）',
+ exp:'水圧はあらゆる方向に同じ大きさで働く。深いほど大きくなる。'},
+{cat:'物理',cls:'cat-phys',
+ q:'物体を持ち上げようとしたが動かなかったとき、力がした仕事は何Jか？',
+ a:'0J',
+ exp:'仕事＝力×移動距離。移動距離がゼロなら仕事もゼロ。'},
+{cat:'物理',cls:'cat-phys',
+ q:'摩擦がなければ、位置エネルギー＋運動エネルギーの和はどうなるか？',
+ a:'一定に保たれる（保存される）',
+ exp:'力学的エネルギー保存の法則。ジェットコースターや振り子に成り立つ。'},
+{cat:'物理',cls:'cat-phys',
+ q:'フレミングの左手の法則で、人差し指・中指・親指がそれぞれ示すものは？',
+ a:'人差し指：磁界の向き、中指：電流の向き、親指：力の向き',
+ exp:'電動機（モーター）で力の向きを求めるときに使う。'},
+{cat:'物理',cls:'cat-phys',
+ q:'電源電圧12V・電流3Aのとき、回路全体の抵抗は何Ωか？',
+ a:'4Ω',
+ exp:'R＝V/I＝12÷3＝4Ω。オームの法則を変形して使う。'},
+{cat:'物理',cls:'cat-phys',
+ q:'質量2kgの物体を高さ5m持ち上げたときの位置エネルギーは何Jか？（g＝10m/s²）',
+ a:'100J',
+ exp:'位置E＝mgh＝2×10×5＝100J。'},
+{cat:'物理',cls:'cat-phys',
+ q:'音は真空中を伝わるか？',
+ a:'伝わらない',
+ exp:'音は媒質（空気・水・固体）の振動で伝わる縦波。媒質がない真空では伝わらない。'},
+{cat:'物理',cls:'cat-phys',
+ q:'電圧計は回路に対してどのようにつなぐか？',
+ a:'並列につなぐ',
+ exp:'電流計は直列につなぐ。電圧計は内部抵抗が大きく、電流計は内部抵抗が小さい。'},
+{cat:'物理',cls:'cat-phys',
+ q:'電源電圧6V・抵抗3Ωのとき、回路に流れる電流は何Aか？',
+ a:'2A',
+ exp:'I＝V/R＝6÷3＝2A。基本中の基本。'},
+{cat:'物理',cls:'cat-phys',
+ q:'100Wの電球を10秒間使うと、消費する電気エネルギーは何Jか？',
+ a:'1000J',
+ exp:'電力量[J]＝電力[W]×時間[s]＝100×10＝1000J。'},
+{cat:'物理',cls:'cat-phys',
+ q:'斜面・てこなど道具を使って仕事をすると、仕事の量はどうなるか？',
+ a:'道具を使わない場合と同じ（変わらない）',
+ exp:'仕事の原理。道具を使うと力は小さくできるが、距離が増えるため仕事量は一定。'},
+{cat:'物理',cls:'cat-phys',
+ q:'同じ高さから転がした2つの球（質量が異なる）が斜面底に達したとき速さは？（摩擦なし）',
+ a:'同じ速さ',
+ exp:'mgh＝½mv²のmが消える。速さは質量によらない（ガリレオが発見）。'},
+{cat:'物理',cls:'cat-phys',
+ q:'1Wh（ワット時）は何Jか？',
+ a:'3600J',
+ exp:'1Wh＝1W×3600s＝3600J。電力量の単位の換算は頻出。'},
+
+// ━━ 生物 30問 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{cat:'生物',cls:'cat-bio',
+ q:'顕微鏡で対物レンズを倍率の高いものに変えると、視野の明るさはどうなるか？',
+ a:'暗くなる',
+ exp:'視野が狭くなり入ってくる光の量が減る。絞りやミラーで調節する。'},
+{cat:'生物',cls:'cat-bio',
+ q:'植物細胞で光合成を行う、緑色の粒を何というか？',
+ a:'葉緑体',
+ exp:'CO₂＋H₂O→有機物＋O₂（光エネルギーを使う反応）。'},
+{cat:'生物',cls:'cat-bio',
+ q:'葉の表面にある気体と水の出入り口を何というか？',
+ a:'気孔',
+ exp:'葉の裏側に多い。蒸散・光合成・呼吸のガス交換を行う。'},
+{cat:'生物',cls:'cat-bio',
+ q:'だ液に含まれ、デンプンを麦芽糖に分解する消化酵素は何か？',
+ a:'アミラーゼ',
+ exp:'消化酵素は37℃前後で最も活性が高く、温度やpHの影響を受ける。'},
+{cat:'生物',cls:'cat-bio',
+ q:'細胞内でエネルギー（ATP）をつくりだす場所はどこか？',
+ a:'ミトコンドリア',
+ exp:'有機物＋O₂→CO₂＋H₂O＋エネルギー（細胞呼吸）。'},
+{cat:'生物',cls:'cat-bio',
+ q:'遺伝の法則（優性の法則・分離の法則）を発見した科学者は誰か？',
+ a:'メンデル',
+ exp:'エンドウ豆を使い実験。「遺伝学の父」。優性・劣性（顕性・潜性）の法則を発見。'},
+{cat:'生物',cls:'cat-bio',
+ q:'脊椎動物のうち、体温が一定の恒温動物は哺乳類と何類か？',
+ a:'鳥類',
+ exp:'魚類・両生類・爬虫類は変温動物。恒温動物は鳥類と哺乳類のみ。'},
+{cat:'生物',cls:'cat-bio',
+ q:'細胞の活動の中心で、DNAを含む場所はどこか？',
+ a:'核',
+ exp:'核の中に染色体（DNA）がある。細菌などの原核生物は核を持たない。'},
+{cat:'生物',cls:'cat-bio',
+ q:'光合成で植物が取り入れる気体は何か？',
+ a:'二酸化炭素（CO₂）',
+ exp:'光合成でCO₂を取り込み、O₂を排出する。呼吸はO₂を取り込みCO₂を排出。'},
+{cat:'生物',cls:'cat-bio',
+ q:'ヒトの消化管で、栄養分の吸収が最も盛んに行われる場所はどこか？',
+ a:'小腸',
+ exp:'小腸の内壁の柔毛（じゅうもう）が表面積を広げ、効率よく栄養を吸収する。'},
+{cat:'生物',cls:'cat-bio',
+ q:'血液中で酸素を運ぶ役割をもつ血球は何か？',
+ a:'赤血球',
+ exp:'ヘモグロビンが酸素と結合・解離する。成熟した赤血球には核がない。'},
+{cat:'生物',cls:'cat-bio',
+ q:'ヒトの心臓で、全身に血液を送り出す部屋はどれか？',
+ a:'左心室',
+ exp:'左心室→大動脈→全身。右心室→肺動脈→肺（肺循環）。'},
+{cat:'生物',cls:'cat-bio',
+ q:'背骨（脊椎）を持つ動物をまとめて何というか？',
+ a:'脊椎動物',
+ exp:'魚類・両生類・爬虫類・鳥類・哺乳類の5グループ。'},
+{cat:'生物',cls:'cat-bio',
+ q:'背骨を持たない動物をまとめて何というか？',
+ a:'無脊椎動物',
+ exp:'昆虫・甲殻類・軟体動物・棘皮動物など非常に多様なグループが含まれる。'},
+{cat:'生物',cls:'cat-bio',
+ q:'細胞分裂のとき、核の中に現れる棒状の構造物は何か？',
+ a:'染色体',
+ exp:'DNAとタンパク質からなる。ヒトは通常46本（23対）持つ。'},
+{cat:'生物',cls:'cat-bio',
+ q:'遺伝で、雑種第一代（F1）に現れる形質を何というか？',
+ a:'優性（顕性）形質',
+ exp:'F1に現れない形質が劣性（潜性）形質。両者の遺伝子は消えずに受け継がれる。'},
+{cat:'生物',cls:'cat-bio',
+ q:'植物の根の先端付近にある、吸収面積を増やす毛状の構造は何か？',
+ a:'根毛',
+ exp:'根毛によって表面積が増え、水と無機物（ミネラル）を効率よく吸収できる。'},
+{cat:'生物',cls:'cat-bio',
+ q:'タンパク質は消化されて最終的に何になるか？',
+ a:'アミノ酸',
+ exp:'タンパク質→（胃液・膵液など）→アミノ酸の順に分解され、小腸で吸収される。'},
+{cat:'生物',cls:'cat-bio',
+ q:'植物の茎で、水と無機物を根から葉へ運ぶ管を何というか？',
+ a:'道管（木部）',
+ exp:'師管は葉でつくった有機物（糖）を全体へ運ぶ。道管と師管で維管束を形成。'},
+{cat:'生物',cls:'cat-bio',
+ q:'ヒトの肺の内部で、ガス交換が行われる小さな袋を何というか？',
+ a:'肺胞',
+ exp:'肺胞の薄い壁と毛細血管を通じてO₂とCO₂を交換する。数億個あり表面積が広い。'},
+{cat:'生物',cls:'cat-bio',
+ q:'受精卵が細胞分裂を繰り返して成長していく過程を何というか？',
+ a:'発生',
+ exp:'受精卵→胚→幼生→成体の過程。ヒトでは約9か月で誕生する。'},
+{cat:'生物',cls:'cat-bio',
+ q:'昆虫類の脚の本数は何本か？また、脚はどこから出るか？',
+ a:'6本（胸部から3対）',
+ exp:'体は頭部・胸部・腹部の3部。翅（はね）も胸部からある。節足動物の一種。'},
+{cat:'生物',cls:'cat-bio',
+ q:'生物が長い世代をかけて変化していくことを何というか？',
+ a:'進化',
+ exp:'ダーウィンが自然選択（自然淘汰）説を提唱。環境に適した個体が生き残り子孫を残す。'},
+{cat:'生物',cls:'cat-bio',
+ q:'幼生は水中でえら呼吸をするが、成体では肺呼吸をする脊椎動物は何類か？',
+ a:'両生類',
+ exp:'カエル・イモリ・サンショウウオなど。成体は肺と皮膚でも呼吸する。'},
+{cat:'生物',cls:'cat-bio',
+ q:'メンデルの実験で丸い種子（RR）と皺の種子（rr）をかけ合わせると、F1はどうなるか？',
+ a:'すべて丸い種子（Rr）',
+ exp:'丸（R）が優性。F1はすべてRrとなり丸になる。F2では丸：皺＝3：1に分離する。'},
+{cat:'生物',cls:'cat-bio',
+ q:'ヒトの血液成分で、止血（血液凝固）の役割をもつのは何か？',
+ a:'血小板',
+ exp:'傷口でフィブリンという繊維をつくって血液を固め、出血を止める。'},
+{cat:'生物',cls:'cat-bio',
+ q:'植物細胞にあって、動物細胞にはない構造を3つ答えよ',
+ a:'細胞壁・葉緑体・液胞',
+ exp:'細胞壁：形を保つ。葉緑体：光合成。液胞：水・糖・老廃物を貯蔵。'},
+{cat:'生物',cls:'cat-bio',
+ q:'食物連鎖で有機物を無機物に分解する、細菌や菌類をまとめて何というか？',
+ a:'分解者',
+ exp:'生態系：生産者（植物）→消費者（動物）→分解者（細菌・菌類）。物質が循環する。'},
+{cat:'生物',cls:'cat-bio',
+ q:'顕微鏡で観察するとき、最初に低倍率を使う理由は何か？',
+ a:'視野が広く、観察対象を見つけやすいから',
+ exp:'低倍率→広い視野で目的物を探し→高倍率に切り替えて詳しく観察する。'},
+{cat:'生物',cls:'cat-bio',
+ q:'ヒトが肺で行う、O₂を取り込みCO₂を出す呼吸を何というか？',
+ a:'肺呼吸（外呼吸）',
+ exp:'細胞内のミトコンドリアで行われる呼吸を細胞呼吸（内呼吸）という。両方が重要。'},
+
+// ━━ 地学 30問 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{cat:'地学',cls:'cat-earth',
+ q:'地球の表面を覆う十数枚の岩盤を何というか？',
+ a:'プレート',
+ exp:'年間数cmずつ移動。境界でぶつかり合い地震・火山が発生する。'},
+{cat:'地学',cls:'cat-earth',
+ q:'地震波のP波とS波のうち、より速く伝わるのはどちらか？',
+ a:'P波',
+ exp:'P波（縦波）が先→初期微動。S波（横波）が後→主要動（大きな揺れ）。'},
+{cat:'地学',cls:'cat-earth',
+ q:'日本の天気が西から東へ変わりやすい主な原因は何か？',
+ a:'偏西風',
+ exp:'中緯度帯（日本上空）では常に西→東へ偏西風が吹く。低気圧も東へ移動する。'},
+{cat:'地学',cls:'cat-earth',
+ q:'暖気が寒気の上にゆっくり乗り上げ、広範囲に弱い雨をもたらす前線は何か？',
+ a:'温暖前線',
+ exp:'通過後は気温が上昇する。天気図では半円（半楕円）記号で表す。'},
+{cat:'地学',cls:'cat-earth',
+ q:'地層中に残された生物の遺骸や生活の痕跡を何というか？',
+ a:'化石',
+ exp:'示準化石：地層の年代を知る手がかり（サンヨウチュウなど）。示相化石：環境を知る手がかり（サンゴなど）。'},
+{cat:'地学',cls:'cat-earth',
+ q:'月が満月から次の満月になるまでの周期は約何日か？',
+ a:'約29.5日（朔望月）',
+ exp:'月の自転・公転周期は約27.3日（同じなので常に同じ面が地球を向く）。'},
+{cat:'地学',cls:'cat-earth',
+ q:'太陽系で最も大きな惑星はどれか？',
+ a:'木星',
+ exp:'直径は地球の約11倍。大赤斑（巨大な嵐）が特徴。ガス惑星の代表格。'},
+{cat:'地学',cls:'cat-earth',
+ q:'マグマが地表（または地表付近）で急冷されてできた岩石を何というか？',
+ a:'火山岩',
+ exp:'急冷→斑状組織（細かい石基の中に斑晶）。玄武岩・安山岩・流紋岩など。'},
+{cat:'地学',cls:'cat-earth',
+ q:'マグマが地下深部でゆっくり冷えてできた岩石を何というか？',
+ a:'深成岩',
+ exp:'ゆっくり冷→等粒状組織（大きな結晶が均一）。花こう岩・せん緑岩・斑れい岩など。'},
+{cat:'地学',cls:'cat-earth',
+ q:'P波とS波の到達時間の差を何というか？',
+ a:'初期微動継続時間',
+ exp:'震源から遠いほど初期微動継続時間が長くなる。震源までの距離を推定できる。'},
+{cat:'地学',cls:'cat-earth',
+ q:'空気が上昇して冷えることで水蒸気が凝結し、できるものは何か？',
+ a:'雲',
+ exp:'空気が露点以下に冷えると水滴・氷晶になる（凝結）。これが雲のもと。'},
+{cat:'地学',cls:'cat-earth',
+ q:'日本の夏に南東から、冬に北西から吹く風を何というか？',
+ a:'季節風（モンスーン）',
+ exp:'夏：太平洋高気圧から湿った南東風。冬：シベリア高気圧から乾いた北西風。'},
+{cat:'地学',cls:'cat-earth',
+ q:'れき・砂・泥を粒の大きい順に並べよ',
+ a:'れき＞砂＞泥',
+ exp:'れき（2mm以上）・砂（0.06〜2mm）・泥（0.06mm未満）。粒が細かいほど遠くまで運ばれる。'},
+{cat:'地学',cls:'cat-earth',
+ q:'流水の3つのはたらきを答えよ',
+ a:'侵食・運搬・堆積',
+ exp:'上流では侵食・運搬が盛ん（V字谷）。下流では堆積が盛ん（三角州・扇状地）。'},
+{cat:'地学',cls:'cat-earth',
+ q:'地震の揺れの強さを0〜7の10段階で表す尺度を何というか？',
+ a:'震度',
+ exp:'マグニチュード（M）は地震全体のエネルギー。Mが1増えると約32倍のエネルギー。'},
+{cat:'地学',cls:'cat-earth',
+ q:'地球内部の構造で、地殻の下にある固体のマントルより下の液体の層は何か？',
+ a:'外核',
+ exp:'地殻→マントル（固体）→外核（液体）→内核（固体）の順。外核はおもに鉄・ニッケル。'},
+{cat:'地学',cls:'cat-earth',
+ q:'低気圧の中心から伸びる2種類の前線を答えよ',
+ a:'温暖前線と寒冷前線',
+ exp:'低気圧の南東に温暖前線（半円）、南西に寒冷前線（三角）が伸びる。'},
+{cat:'地学',cls:'cat-earth',
+ q:'月食が起こるのは太陽・地球・月がどのような順のときか？',
+ a:'太陽・地球・月の順（地球の影に月が入る）',
+ exp:'月食は満月のときのみ起こりうる。月が地球の本影に入ると皆既月食になる。'},
+{cat:'地学',cls:'cat-earth',
+ q:'日食が起こるのは太陽・月・地球がどのような順のときか？',
+ a:'太陽・月・地球の順（月が太陽を隠す）',
+ exp:'日食は新月のときのみ起こりうる。月が太陽の前を通過するため。'},
+{cat:'地学',cls:'cat-earth',
+ q:'地球の自転の向きはどちらか？（北極上空から見て）',
+ a:'反時計回り（西→東）',
+ exp:'これにより太陽・月・星が東から出て西に沈むように見える（日周運動）。'},
+{cat:'地学',cls:'cat-earth',
+ q:'北極星がほぼ動かずに見える理由は何か？',
+ a:'地球の自転軸（地軸）の延長上に北極星がほぼあるから',
+ exp:'他の星は地軸を中心に回るように見えるが、北極星はほぼその場にある。'},
+{cat:'地学',cls:'cat-earth',
+ q:'火山灰が固まってできた堆積岩を何というか？また地層の対比に使えるのはなぜか？',
+ a:'凝灰岩。短期間に広範囲に積もるため同時代の目印（鍵層）になるから',
+ exp:'凝灰岩の層（鍵層）を利用して離れた地層を対比（同一時代か確認）できる。'},
+{cat:'地学',cls:'cat-earth',
+ q:'地層の重なりで、逆転がなければ下の地層は上の地層より何か？',
+ a:'古い',
+ exp:'地層累重の法則：地層は下が古く上が新しい。地層逆転の場合は注意が必要。'},
+{cat:'地学',cls:'cat-earth',
+ q:'火山噴火で放出される岩石の破片・火山灰などをまとめて何というか？',
+ a:'火山砕屑物（火砕物）',
+ exp:'火山弾・軽石・火山灰・火砕流などが含まれる。粒の大きさで分類される。'},
+{cat:'地学',cls:'cat-earth',
+ q:'太陽系で最も太陽に近い惑星はどれか？',
+ a:'水星',
+ exp:'太陽系8惑星（内側から）：水・金・地・火・木・土・天・海王星。'},
+{cat:'地学',cls:'cat-earth',
+ q:'日本付近で冬に北西の季節風が吹くとき、日本海側の天気はどうなるか？',
+ a:'雪や雨が多い（降水量が多い）',
+ exp:'北西の冷たい風が日本海で水蒸気を含み、山脈にぶつかって雪を降らせる。太平洋側は晴れ。'},
+{cat:'地学',cls:'cat-earth',
+ q:'れき・砂・泥などが押し固められてできた岩石をまとめて何というか？',
+ a:'堆積岩',
+ exp:'れき岩・砂岩・泥岩・凝灰岩・石灰岩・チャートなどが堆積岩に分類される。'},
+{cat:'地学',cls:'cat-earth',
+ q:'海洋プレートが大陸プレートの下に沈み込む場所にできる海底の深い溝は何か？',
+ a:'海溝',
+ exp:'日本海溝・マリアナ海溝など。日本付近は海溝に近く地震が多い。'},
+{cat:'地学',cls:'cat-earth',
+ q:'地球が1日1回自転することで起こる、天体の見かけの動きを何というか？',
+ a:'日周運動',
+ exp:'地球が西→東に自転するため、天体は東から出て西へ沈むように見える。'},
+{cat:'地学',cls:'cat-earth',
+ q:'地球が太陽の周りを1年で公転することで起こる、星座の変化を何というか？',
+ a:'年周運動',
+ exp:'地球の公転により季節によって見える星座が変わる。同じ時刻に見える星は1か月で約30°西にずれる。'},
+]; // END ALL_CARDS
+
+// ── PARTICLES ─────────────────────────────────────────────────────────────────
 (function(){
     const cv=document.getElementById('bg-cv');
-    const ctx=cv.getContext('2d');
-    let pts=[];
+    const ctx=cv.getContext('2d');let pts=[];
     function resize(){cv.width=innerWidth;cv.height=innerHeight;}
-    addEventListener('resize',resize); resize();
+    addEventListener('resize',resize);resize();
     function mkPt(){return{x:Math.random()*cv.width,y:cv.height+4,
         r:Math.random()*1.4+.3,s:Math.random()*.55+.2,a:Math.random()*.35+.07,
         col:Math.random()>.5?'#00ffcc':'#0088ff',t:Math.random()*120};}
@@ -489,46 +805,37 @@ const CARDS = [
         ctx.clearRect(0,0,cv.width,cv.height);
         if(pts.length<55)pts.push(mkPt());
         pts=pts.filter(p=>p.y>-8);
-        for(const p of pts){
-            p.y-=p.s; p.x+=Math.sin((p.y+p.t)/65)*.35;
+        for(const p of pts){p.y-=p.s;p.x+=Math.sin((p.y+p.t)/65)*.35;
             ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-            ctx.fillStyle=p.col;ctx.globalAlpha=p.a;ctx.fill();
-        }
-        ctx.globalAlpha=1; requestAnimationFrame(draw);
-    }
+            ctx.fillStyle=p.col;ctx.globalAlpha=p.a;ctx.fill();}
+        ctx.globalAlpha=1;requestAnimationFrame(draw);}
     draw();
 })();
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
-function shuffle(arr){
-    for(let i=arr.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [arr[i],arr[j]]=[arr[j],arr[i]];
-    }
-    return arr;
-}
-function show(id){
-    ['top-screen','quiz-screen','result-screen'].forEach(s=>{
-        document.getElementById(s).style.display=s===id?'flex':'none';
-    });
-}
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+function show(id){['top-screen','quiz-screen','result-screen'].forEach(s=>{
+    document.getElementById(s).style.display=s===id?'flex':'none';});}
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
-let queue=[]; let mastered=new Set();
+let selected=[];let queue=[];let mastered=new Set();
 let rp=0,correct=0,totalAnswered=0,streak=0,maxStreak=0,revealed=false;
 
 // ── QUIZ ──────────────────────────────────────────────────────────────────────
-function startQuiz(){
-    queue=shuffle(CARDS.map((_,i)=>i));
-    mastered.clear();
-    rp=0;correct=0;totalAnswered=0;streak=0;maxStreak=0;
-    show('quiz-screen'); loadCard();
+function startQuiz(subject){
+    selected=subject==='all'?[...ALL_CARDS]:ALL_CARDS.filter(c=>c.cat===subject);
+    queue=shuffle(selected.map((_,i)=>i));
+    mastered.clear();rp=0;correct=0;totalAnswered=0;streak=0;maxStreak=0;
+    const badge=document.getElementById('session-badge');
+    badge.textContent=subject==='all'?'全分野 120問':subject+' 30問';
+    show('quiz-screen');loadCard();
 }
 
 function loadCard(){
     if(queue.length===0){showResult();return;}
     revealed=false;
-    const card=CARDS[queue[0]];
+    const card=selected[queue[0]];
     document.getElementById('q-cat').textContent=card.cat;
     document.getElementById('q-cat').className='q-cat '+card.cls;
     document.getElementById('q-text').textContent=card.q;
@@ -540,7 +847,7 @@ function loadCard(){
 }
 
 function reveal(){
-    if(revealed)return; revealed=true;
+    if(revealed)return;revealed=true;
     document.getElementById('flip-card').classList.add('flipped');
     setTimeout(()=>{
         document.getElementById('btn-reveal').style.display='none';
@@ -549,32 +856,29 @@ function reveal(){
 }
 
 function judge(ok){
-    if(!revealed)return;
-    totalAnswered++;
+    if(!revealed)return;totalAnswered++;
     const idx=queue[0];
     if(ok){
-        mastered.add(idx); queue.shift();
-        correct++; streak++; maxStreak=Math.max(maxStreak,streak);
+        mastered.add(idx);queue.shift();correct++;streak++;
+        maxStreak=Math.max(maxStreak,streak);
         const bonus=streak>=10?30:streak>=5?20:streak>=3?15:10;
         rp+=bonus;
         showRPPopup('+'+bonus+' RP'+(streak>=3?' 🔥':''));
         flashScreen('green');
-        if(streak===3) showCombo('🔥 3連続！');
-        if(streak===5) showCombo('💥 5連続！！');
+        if(streak===3)showCombo('🔥 3連続！');
+        if(streak===5)showCombo('💥 5連続！！');
         if(streak===10)showCombo('⚡ 10連続！！！');
     }else{
-        queue.shift(); queue.push(idx);
-        streak=0; flashScreen('red');
+        queue.shift();queue.push(idx);streak=0;flashScreen('red');
     }
-    updateHUD();
-    setTimeout(loadCard,360);
+    updateHUD();setTimeout(loadCard,360);
 }
 
 function updateHUD(){
     document.getElementById('rp-val').textContent=rp;
-    const pct=Math.round((mastered.size/CARDS.length)*100);
+    const pct=Math.round((mastered.size/selected.length)*100);
     document.getElementById('gauge-bar').style.width=pct+'%';
-    document.getElementById('gauge-pct').textContent=mastered.size+' / '+CARDS.length;
+    document.getElementById('gauge-pct').textContent=mastered.size+' / '+selected.length;
     document.getElementById('prog-chip').textContent='残り '+queue.length+'問';
     document.getElementById('correct-chip').textContent='✓ 正解 '+correct;
     document.getElementById('streak-num').textContent=streak;
@@ -584,22 +888,14 @@ function updateHUD(){
 
 // ── EFFECTS ───────────────────────────────────────────────────────────────────
 function flashScreen(color){
-    const el=document.getElementById('flash');
-    el.className='flash '+color+' show';
-    setTimeout(()=>el.className='flash '+color,140);
-}
+    const el=document.getElementById('flash');el.className='flash '+color+' show';
+    setTimeout(()=>el.className='flash '+color,140);}
 function showCombo(txt){
-    const el=document.createElement('div');
-    el.className='combo-popup'; el.textContent=txt;
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),880);
-}
+    const el=document.createElement('div');el.className='combo-popup';el.textContent=txt;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),880);}
 function showRPPopup(txt){
-    const el=document.createElement('div');
-    el.className='rp-popup'; el.textContent=txt;
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),950);
-}
+    const el=document.createElement('div');el.className='rp-popup';el.textContent=txt;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
 
 // ── RESULT ────────────────────────────────────────────────────────────────────
 function showResult(){
@@ -609,22 +905,14 @@ function showResult(){
     document.getElementById('res-streak').textContent=maxStreak;
     document.getElementById('res-total').textContent=totalAnswered;
     let stars,msg;
-    if(acc>=90&&maxStreak>=5){
-        stars='⭐⭐⭐';
-        msg='パーフェクト研究者！都立最上位校もこの調子で狙えます。次は時間を計って再挑戦！🎯';
-    }else if(acc>=70){
-        stars='⭐⭐';
-        msg='よくできました！正答率は合格ライン。間違えた問題を重点的に繰り返そう！💪';
-    }else{
-        stars='⭐';
-        msg='まだまだこれから！繰り返すことで必ず定着します。科学の道に近道なし！🔬';
-    }
+    if(acc>=90&&maxStreak>=5){stars='⭐⭐⭐';msg='完璧！都立最上位校もこの調子で狙えます。次は別の分野にも挑戦しよう！🎯';}
+    else if(acc>=70){stars='⭐⭐';msg='よくできました！正答率は合格ライン。間違えた分野を重点的に繰り返そう！💪';}
+    else{stars='⭐';msg='まだまだこれから！繰り返すことで必ず定着します。科学の道に近道なし！🔬';}
     document.getElementById('res-stars').textContent=stars;
     document.getElementById('res-msg').textContent=msg;
     show('result-screen');
 }
-
-function resetQuiz(){ show('top-screen'); }
+function resetQuiz(){show('top-screen');}
 </script>
 </body>
 </html>
