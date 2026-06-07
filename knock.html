@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciLab 30本ノック</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg:#060c1a; --bg2:#0a1628; --bg3:#0d1f3c;
+            --cyan:#00ffcc; --blue:#0088ff; --purple:#8800ff;
+            --green:#00ff64; --orange:#ff8800;
+            --text:#d0e8ff; --dim:#6888aa;
+        }
+        html,body { height:100%; background:var(--bg); color:var(--text);
+            font-family:'Segoe UI',system-ui,sans-serif; overflow-x:hidden; }
+        body::before { content:''; position:fixed; inset:0;
+            background: linear-gradient(rgba(0,136,255,.04) 1px,transparent 1px),
+                        linear-gradient(90deg,rgba(0,136,255,.04) 1px,transparent 1px);
+            background-size:48px 48px; pointer-events:none; z-index:0; }
+        body::after { content:''; position:fixed; inset:0;
+            background:repeating-linear-gradient(0deg,transparent,transparent 2px,
+                rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
+            pointer-events:none; z-index:0; }
+        canvas#bg-cv { position:fixed; inset:0; z-index:0; pointer-events:none; }
+        .screen { position:relative; z-index:1; min-height:100vh; }
+
+        /* ═══ TOP ═══ */
+        #top-screen { display:flex; flex-direction:column; align-items:center;
+            justify-content:center; padding:40px 24px; }
+        .top-badge { font-size:.68rem; letter-spacing:.22em; color:var(--cyan);
+            border:1px solid rgba(0,255,204,.3); padding:4px 16px; border-radius:20px;
+            margin-bottom:22px; text-transform:uppercase;
+            animation:blink-border 3s ease-in-out infinite; }
+        @keyframes blink-border {
+            0%,100%{border-color:rgba(0,255,204,.3);box-shadow:none;}
+            50%{border-color:rgba(0,255,204,.7);box-shadow:0 0 10px rgba(0,255,204,.2);} }
+        .top-icon { font-size:5rem; margin-bottom:16px; animation:float 5s ease-in-out infinite;
+            filter:drop-shadow(0 0 18px rgba(0,255,204,.65)); }
+        .top-title { font-size:clamp(2.6rem,9vw,4.8rem); font-weight:900; letter-spacing:.15em;
+            background:linear-gradient(120deg,var(--cyan) 0%,var(--blue) 55%,var(--purple) 100%);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+            filter:drop-shadow(0 0 28px rgba(0,255,204,.4)); margin-bottom:4px; }
+        .top-knock { font-size:clamp(1rem,4vw,1.5rem); font-weight:900; color:var(--orange);
+            letter-spacing:.2em; margin-bottom:4px;
+            text-shadow:0 0 12px rgba(255,136,0,.5);
+            animation:blink-knock 2s ease-in-out infinite; }
+        @keyframes blink-knock {
+            0%,100%{text-shadow:0 0 10px rgba(255,136,0,.4);}
+            50%{text-shadow:0 0 26px rgba(255,136,0,.9);} }
+        .top-sub { font-size:.78rem; letter-spacing:.28em; color:var(--dim);
+            text-transform:uppercase; margin-bottom:28px; }
+        .top-stats { display:flex; gap:16px; margin-bottom:28px; }
+        .top-stat { text-align:center; background:rgba(0,136,255,.08);
+            border:1px solid rgba(0,136,255,.2); border-radius:10px; padding:12px 18px; }
+        .top-stat-num { font-size:1.7rem; font-weight:900; color:var(--cyan); }
+        .top-stat-lbl { font-size:.62rem; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; }
+        .top-desc { text-align:center; font-size:.9rem; color:var(--dim);
+            line-height:1.85; max-width:380px; margin-bottom:32px; }
+        .top-desc strong { color:var(--cyan); }
+        .start-btn { position:relative; padding:16px 56px; font-size:1.05rem; font-weight:700;
+            letter-spacing:.12em; color:#000d1a;
+            background:linear-gradient(135deg,var(--cyan),var(--blue));
+            border:none; border-radius:4px; cursor:pointer; overflow:hidden;
+            transition:transform .2s,box-shadow .2s; text-transform:uppercase;
+            box-shadow:0 0 24px rgba(0,255,204,.4),0 0 48px rgba(0,136,255,.15); }
+        .start-btn::before { content:''; position:absolute; inset:0;
+            background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);
+            transform:translateX(-100%); transition:transform .5s; }
+        .start-btn:hover { transform:translateY(-3px) scale(1.02);
+            box-shadow:0 0 36px rgba(0,255,204,.6),0 0 70px rgba(0,136,255,.25); }
+        .start-btn:hover::before { transform:translateX(100%); }
+        .start-btn:active { transform:scale(.97); }
+
+        /* ═══ QUIZ ═══ */
+        #quiz-screen { display:none; flex-direction:column; }
+
+        .qhdr { padding:12px 16px 10px; background:rgba(6,12,26,.9);
+            border-bottom:1px solid rgba(0,136,255,.2);
+            backdrop-filter:blur(14px); position:sticky; top:0; z-index:10; }
+        .qhdr-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .qhdr-logo { font-size:.7rem; letter-spacing:.18em; color:var(--dim); text-transform:uppercase; }
+        .hdr-right { display:flex; align-items:center; gap:14px; }
+
+        .streak-wrap { display:flex; align-items:center; gap:4px; font-size:.85rem; font-weight:700; }
+        .streak-icon { font-size:1rem; }
+        .streak-num { color:var(--dim); transition:color .3s,text-shadow .3s; font-variant-numeric:tabular-nums; }
+        .streak-unit { font-size:.6rem; color:var(--dim); }
+        .streak-wrap.hot3 .streak-num { color:#ffd700; }
+        .streak-wrap.hot5 .streak-num { color:var(--orange); text-shadow:0 0 10px rgba(255,136,0,.6); }
+        .streak-wrap.hot10 .streak-num { color:#ff4400; text-shadow:0 0 18px rgba(255,68,0,.9);
+            animation:pulse-streak .5s ease-in-out infinite; }
+        @keyframes pulse-streak { 0%,100%{transform:scale(1);}50%{transform:scale(1.18);} }
+
+        .rp-display { display:flex; align-items:baseline; gap:3px; }
+        .rp-val { font-size:1.4rem; font-weight:900; color:var(--cyan); font-variant-numeric:tabular-nums; }
+        .rp-label { font-size:.62rem; color:var(--dim); letter-spacing:.1em; }
+
+        .gauge-wrap { width:100%; height:6px; background:rgba(255,255,255,.08); border-radius:3px; }
+        .gauge-bar { height:100%; width:0%;
+            background:linear-gradient(90deg,var(--blue),var(--cyan)); border-radius:3px;
+            transition:width .7s cubic-bezier(.34,1.56,.64,1);
+            box-shadow:0 0 10px rgba(0,255,204,.5); }
+        .gauge-row { display:flex; justify-content:space-between;
+            margin-top:5px; font-size:.62rem; color:var(--dim); }
+
+        .prog-row { display:flex; justify-content:center; gap:10px; padding:8px 16px; }
+        .prog-chip { font-size:.7rem; padding:3px 13px; border-radius:20px;
+            background:rgba(0,136,255,.08); border:1px solid rgba(0,136,255,.2); color:var(--dim); }
+        .prog-chip.accent { border-color:rgba(0,255,204,.3); color:var(--cyan); }
+
+        .q-area { padding:16px 20px 8px; text-align:center; }
+        .q-cat { display:inline-block; padding:3px 15px; border-radius:20px;
+            font-size:.67rem; font-weight:700; letter-spacing:.13em;
+            text-transform:uppercase; margin-bottom:12px; }
+        .cat-chem  { background:rgba(255,160,0,.12); color:#ffaa00; border:1px solid rgba(255,160,0,.3); }
+        .cat-phys  { background:rgba(0,136,255,.12); color:#44aaff; border:1px solid rgba(0,136,255,.3); }
+        .cat-bio   { background:rgba(0,255,100,.12); color:#44ff88; border:1px solid rgba(0,255,100,.3); }
+        .cat-earth { background:rgba(180,100,255,.12); color:#cc88ff; border:1px solid rgba(180,100,255,.3); }
+
+        .q-text { font-size:clamp(.92rem,3vw,1.18rem); line-height:1.8;
+            color:var(--text); max-width:540px; margin:0 auto; }
+
+        .card-wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:14px 18px; }
+        .flip-card { width:100%; max-width:500px; height:200px; perspective:1200px; }
+        @media(min-width:600px){.flip-card{height:250px;}}
+
+        .flip-inner { position:relative; width:100%; height:100%;
+            transform-style:preserve-3d;
+            transition:transform .65s cubic-bezier(.4,0,.2,1); }
+        .flip-card.flipped .flip-inner { transform:rotateY(180deg); }
+
+        .flip-front,.flip-back { position:absolute; inset:0; backface-visibility:hidden;
+            border-radius:14px; display:flex; flex-direction:column;
+            align-items:center; justify-content:center; padding:22px; gap:7px; }
+        .flip-front::before,.flip-front::after,
+        .flip-back::before,.flip-back::after { content:''; position:absolute; width:18px; height:18px; }
+
+        .flip-front { background:var(--bg3); border:1px solid rgba(0,136,255,.3);
+            box-shadow:0 0 0 1px rgba(0,136,255,.07) inset,0 24px 60px rgba(0,0,0,.5); }
+        .flip-front::before{top:8px;left:8px;border-top:2px solid var(--blue);border-left:2px solid var(--blue);border-radius:2px 0 0 0;}
+        .flip-front::after{bottom:8px;right:8px;border-bottom:2px solid var(--blue);border-right:2px solid var(--blue);border-radius:0 0 2px 0;}
+
+        .flip-back { background:linear-gradient(145deg,#04160a,#091e12);
+            border:1px solid rgba(0,255,100,.38);
+            box-shadow:0 0 0 1px rgba(0,255,100,.07) inset,0 24px 60px rgba(0,0,0,.5);
+            transform:rotateY(180deg); }
+        .flip-back::before{top:8px;left:8px;border-top:2px solid var(--green);border-left:2px solid var(--green);border-radius:2px 0 0 0;}
+        .flip-back::after{bottom:8px;right:8px;border-bottom:2px solid var(--green);border-right:2px solid var(--green);border-radius:0 0 2px 0;}
+
+        .front-icon { font-size:2.6rem; opacity:.2; }
+        .front-hint { font-size:.7rem; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; }
+        .back-label { font-size:.67rem; color:rgba(0,255,100,.6); letter-spacing:.18em; text-transform:uppercase; }
+        .back-answer { font-size:clamp(1.4rem,5vw,2rem); font-weight:900;
+            color:var(--green); text-shadow:0 0 22px rgba(0,255,100,.55); text-align:center; }
+        .back-exp { font-size:.78rem; color:#80b890; line-height:1.6; text-align:center; max-width:380px; }
+
+        .actions { padding:0 16px 24px; max-width:520px; margin:0 auto;
+            width:100%; display:flex; flex-direction:column; gap:9px; }
+        .btn-reveal { padding:13px; background:rgba(0,136,255,.1);
+            border:1px solid rgba(0,136,255,.45); border-radius:8px;
+            color:var(--blue); font-size:.95rem; font-weight:600;
+            letter-spacing:.06em; cursor:pointer; transition:all .2s; }
+        .btn-reveal:hover{background:rgba(0,136,255,.2);box-shadow:0 0 18px rgba(0,136,255,.3);}
+        .judge-row { display:none; gap:9px; }
+        .judge-row.show { display:flex; }
+        .btn-ok,.btn-ng { flex:1; padding:13px; border:none; border-radius:8px;
+            font-size:.95rem; font-weight:700; cursor:pointer;
+            letter-spacing:.04em; transition:all .2s; }
+        .btn-ok{background:linear-gradient(135deg,#007733,var(--green));color:#001a08;box-shadow:0 0 14px rgba(0,255,100,.25);}
+        .btn-ok:hover{transform:translateY(-2px);box-shadow:0 0 26px rgba(0,255,100,.5);}
+        .btn-ng{background:linear-gradient(135deg,#990033,#ff0055);color:#1a0010;box-shadow:0 0 14px rgba(255,0,80,.25);}
+        .btn-ng:hover{transform:translateY(-2px);box-shadow:0 0 26px rgba(255,0,80,.5);}
+
+        /* flash */
+        .flash { position:fixed; inset:0; pointer-events:none; z-index:100;
+            opacity:0; transition:opacity .08s; }
+        .flash.green { background:rgba(0,255,100,.09); }
+        .flash.red   { background:rgba(255,0,80,.09); }
+        .flash.show  { opacity:1; }
+
+        /* combo popup */
+        .combo-popup { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%);
+            font-size:2.2rem; font-weight:900; pointer-events:none; z-index:200; text-align:center;
+            animation:combo-anim .85s ease-out forwards; }
+        @keyframes combo-anim {
+            0%  {opacity:0;transform:translate(-50%,-50%) scale(.5);}
+            30% {opacity:1;transform:translate(-50%,-58%) scale(1.1);}
+            70% {opacity:1;transform:translate(-50%,-66%) scale(1);}
+            100%{opacity:0;transform:translate(-50%,-75%) scale(.9);} }
+
+        /* RP popup */
+        .rp-popup { position:fixed; top:50px; right:20px; font-size:1.15rem; font-weight:900;
+            color:var(--cyan); text-shadow:0 0 12px var(--cyan); pointer-events:none;
+            animation:rp-anim .9s ease-out forwards; z-index:999; }
+        @keyframes rp-anim {
+            0%  {opacity:0;transform:translateY(8px) scale(.7);}
+            30% {opacity:1;transform:translateY(-20px) scale(1.1);}
+            100%{opacity:0;transform:translateY(-55px) scale(1);} }
+
+        /* ═══ RESULT ═══ */
+        #result-screen { display:none; flex-direction:column; align-items:center;
+            justify-content:center; padding:48px 24px; text-align:center; gap:10px; }
+        .res-icon { font-size:5rem; animation:float 4s ease-in-out infinite; }
+        .res-title { font-size:clamp(1.9rem,6vw,2.6rem); font-weight:900;
+            background:linear-gradient(120deg,var(--cyan),var(--blue));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .res-stats { display:grid; grid-template-columns:1fr 1fr;
+            gap:10px; width:100%; max-width:360px; margin:14px 0; }
+        .res-stat { background:rgba(0,136,255,.08); border:1px solid rgba(0,136,255,.2);
+            border-radius:10px; padding:14px 10px; }
+        .res-stat-num { font-size:1.8rem; font-weight:900; color:var(--cyan); line-height:1; }
+        .res-stat-lbl { font-size:.63rem; color:var(--dim); letter-spacing:.1em;
+            text-transform:uppercase; margin-top:4px; }
+        .res-stars { font-size:2rem; letter-spacing:.2em; margin:4px 0; }
+        .res-msg { font-size:.88rem; color:var(--dim); line-height:1.75;
+            max-width:380px; margin:6px 0 18px; }
+        .btn-restart { padding:14px 46px;
+            background:linear-gradient(135deg,var(--cyan),var(--blue));
+            border:none; border-radius:6px; color:#000d1a; font-size:1rem;
+            font-weight:700; cursor:pointer; letter-spacing:.08em;
+            text-transform:uppercase; transition:all .2s; }
+        .btn-restart:hover{transform:translateY(-2px);box-shadow:0 0 26px rgba(0,255,204,.45);}
+
+        @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+    </style>
+</head>
+<body>
+<canvas id="bg-cv"></canvas>
+<div class="flash" id="flash"></div>
+
+<!-- ═══ TOP ═══ -->
+<div id="top-screen" class="screen">
+    <div class="top-badge">⚗️ Science Lab Knock System</div>
+    <div class="top-icon">🔬</div>
+    <div class="top-title">SciLab</div>
+    <div class="top-knock">30本ノック</div>
+    <div class="top-sub">Intensive Drill · No Mercy · All Right</div>
+    <div class="top-stats">
+        <div class="top-stat">
+            <div class="top-stat-num">30</div>
+            <div class="top-stat-lbl">問</div>
+        </div>
+        <div class="top-stat">
+            <div class="top-stat-num">4</div>
+            <div class="top-stat-lbl">分野</div>
+        </div>
+        <div class="top-stat">
+            <div class="top-stat-num">∞</div>
+            <div class="top-stat-lbl">ループ</div>
+        </div>
+    </div>
+    <p class="top-desc">
+        <strong>全問マスターするまで終わらない！</strong><br>
+        間違えたカードは何度でも再出題。<br>
+        3連続でコンボボーナスを狙え！
+    </p>
+    <button class="start-btn" onclick="startQuiz()">⚡ &nbsp;ノック開始</button>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div id="quiz-screen" class="screen">
+    <div class="qhdr">
+        <div class="qhdr-top">
+            <span class="qhdr-logo">⚗️ SciLab Knock</span>
+            <div class="hdr-right">
+                <div class="streak-wrap" id="streak-wrap">
+                    <span class="streak-icon">🔥</span>
+                    <span class="streak-num" id="streak-num">0</span>
+                    <span class="streak-unit">連続</span>
+                </div>
+                <div class="rp-display">
+                    <span class="rp-val" id="rp-val">0</span>
+                    <span class="rp-label">&nbsp;RP</span>
+                </div>
+            </div>
+        </div>
+        <div class="gauge-wrap">
+            <div class="gauge-bar" id="gauge-bar"></div>
+        </div>
+        <div class="gauge-row">
+            <span>マスター進捗</span>
+            <span id="gauge-pct">0 / 30</span>
+        </div>
+    </div>
+
+    <div class="prog-row">
+        <span class="prog-chip" id="prog-chip">残り 30問</span>
+        <span class="prog-chip accent" id="correct-chip">✓ 正解 0</span>
+    </div>
+
+    <div class="q-area">
+        <div class="q-cat" id="q-cat"></div>
+        <p class="q-text" id="q-text"></p>
+    </div>
+
+    <div class="card-wrap">
+        <div class="flip-card" id="flip-card">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <div class="front-icon">❓</div>
+                    <div class="front-hint">答えを考えてみよう</div>
+                </div>
+                <div class="flip-back">
+                    <div class="back-label">✨ 正解</div>
+                    <div class="back-answer" id="back-answer"></div>
+                    <div class="back-exp" id="back-exp"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn-reveal" id="btn-reveal" onclick="reveal()">🔍 &nbsp;答えを見る</button>
+        <div class="judge-row" id="judge-row">
+            <button class="btn-ok" onclick="judge(true)">✅ 覚えた！</button>
+            <button class="btn-ng" onclick="judge(false)">🔄 まだ…</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ RESULT ═══ -->
+<div id="result-screen" class="screen">
+    <div class="res-icon">🏆</div>
+    <div class="res-title">全問マスター！</div>
+    <div class="res-stars" id="res-stars"></div>
+    <div class="res-stats">
+        <div class="res-stat">
+            <div class="res-stat-num" id="res-rp">0</div>
+            <div class="res-stat-lbl">総 RP</div>
+        </div>
+        <div class="res-stat">
+            <div class="res-stat-num" id="res-acc">0%</div>
+            <div class="res-stat-lbl">正答率</div>
+        </div>
+        <div class="res-stat">
+            <div class="res-stat-num" id="res-streak">0</div>
+            <div class="res-stat-lbl">最大連続</div>
+        </div>
+        <div class="res-stat">
+            <div class="res-stat-num" id="res-total">0</div>
+            <div class="res-stat-lbl">総解答数</div>
+        </div>
+    </div>
+    <p class="res-msg" id="res-msg"></p>
+    <button class="btn-restart" onclick="resetQuiz()">🔬 &nbsp;もう一度挑戦</button>
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+const CARDS = [
+    // 化学
+    {cat:'化学',cls:'cat-chem',
+     q:'銅4.0gを完全に加熱したとき、結びつく酸素の最大質量は何gか？',
+     a:'1.0g',
+     exp:'銅：酸素＝4：1の質量比。多摩科技志望なら一瞬で解けるように！'},
+    {cat:'化学',cls:'cat-chem',
+     q:'鉄と硫黄が化合してできる物質の名前は何か？',
+     a:'硫化鉄',
+     exp:'化合すると磁石に引きつけられなくなる。元の物質とは全く異なる性質になる。'},
+    {cat:'化学',cls:'cat-chem',
+     q:'水を電気分解すると、陰極（－極）に発生する気体は何か？',
+     a:'水素',
+     exp:'水素：酸素＝2：1の体積比で発生。水素は陰極、酸素は陽極に集まる。'},
+    {cat:'化学',cls:'cat-chem',
+     q:'炭酸水素ナトリウムを加熱したとき発生する気体は何か？',
+     a:'二酸化炭素',
+     exp:'加熱すると炭酸ナトリウム・水・二酸化炭素に分解される（熱分解）。'},
+    {cat:'化学',cls:'cat-chem',
+     q:'塩酸（HCl水溶液）に亜鉛を入れたとき発生する気体は何か？',
+     a:'水素',
+     exp:'火をつけると「ポン」と音を立てて燃える。気体の中で最も軽い。'},
+    {cat:'化学',cls:'cat-chem',
+     q:'酸化銅を炭素粉末と混ぜて加熱すると、銅と共に発生する気体は何か？',
+     a:'二酸化炭素',
+     exp:'酸化銅（CuO）から酸素が炭素に奪われる。これを「還元」という。'},
+    {cat:'化学',cls:'cat-chem',
+     q:'原子の中心にある、陽子と中性子からなる部分を何というか？',
+     a:'原子核',
+     exp:'電子は原子核の周りを回っている。陽子の数＝原子番号＝元素の種類を決める。'},
+    {cat:'化学',cls:'cat-chem',
+     q:'アルカリ性の水溶液に共通して含まれるイオンは何か？',
+     a:'水酸化物イオン（OH⁻）',
+     exp:'酸性はH⁺（水素イオン）、アルカリ性はOH⁻が多い。中和で水（H₂O）が生成。'},
+    // 物理
+    {cat:'物理',cls:'cat-phys',
+     q:'回路に流れる電流を大きくするには、抵抗をどうすればよいか？',
+     a:'小さくする',
+     exp:'オームの法則 V=IR より I=V/R。電圧一定なら電流と抵抗は反比例。'},
+    {cat:'物理',cls:'cat-phys',
+     q:'10Ωの抵抗に2Aの電流が流れているとき、かかる電圧は何Vか？',
+     a:'20V',
+     exp:'V=IR=10×2=20V。オームの法則は必ず一瞬で使えるようにしよう。'},
+    {cat:'物理',cls:'cat-phys',
+     q:'質量100gの物体にはたらく重力は何Nか？（100g＝1Nとする）',
+     a:'1N',
+     exp:'地球上では100g≈1N。質量（kg）と重力（N）は単位が異なる。'},
+    {cat:'物理',cls:'cat-phys',
+     q:'凸レンズの焦点距離の2倍の位置に物体を置くとき、できる実像の大きさは？',
+     a:'物体と同じ大きさ',
+     exp:'2fの位置では同じ大きさの倒立実像が、レンズの反対側2fの位置にできる。'},
+    {cat:'物理',cls:'cat-phys',
+     q:'音が空気中を伝わる速さはおよそ何m/sか？',
+     a:'約340m/s',
+     exp:'光の速さは約30万km/s。雷のとき光の後に音が聞こえるのはこの差のため。'},
+    {cat:'物理',cls:'cat-phys',
+     q:'コイルと磁石の相対運動で電流を発生させる現象を何というか？',
+     a:'電磁誘導',
+     exp:'発電機の原理。コイル内の磁界が変化すると誘導電流が流れる。'},
+    {cat:'物理',cls:'cat-phys',
+     q:'並列回路では、各区間にかかる電圧はどうなるか？',
+     a:'電源電圧と等しい（すべて同じ）',
+     exp:'並列は電圧が共通、直列は電流が共通。家庭のコンセントは並列つなぎ。'},
+    {cat:'物理',cls:'cat-phys',
+     q:'摩擦・空気抵抗のない斜面を下る物体の速さは時間とともにどうなるか？',
+     a:'一定の割合で速くなる',
+     exp:'重力加速度による等加速度運動。速さは時間に比例して増加する。'},
+    // 生物
+    {cat:'生物',cls:'cat-bio',
+     q:'顕微鏡で対物レンズを倍率の高いものに変えたとき、視野の明るさはどうなるか？',
+     a:'暗くなる',
+     exp:'倍率を上げると視野が狭くなり、入ってくる光の量が減る。'},
+    {cat:'生物',cls:'cat-bio',
+     q:'植物細胞で光合成が行われる、緑色の粒を何というか？',
+     a:'葉緑体',
+     exp:'CO₂＋H₂O→有機物＋O₂の反応を光エネルギーを使って行う。'},
+    {cat:'生物',cls:'cat-bio',
+     q:'葉の表面にある気体と水の出入り口を何というか？',
+     a:'気孔',
+     exp:'葉の裏に多い。光合成でCO₂を取り込みO₂を出す。蒸散もここから行われる。'},
+    {cat:'生物',cls:'cat-bio',
+     q:'だ液に含まれ、デンプンを麦芽糖に分解する消化酵素は何か？',
+     a:'アミラーゼ',
+     exp:'消化酵素は温度とpHの影響を受ける。だ液は中性～弱アルカリ性で働く。'},
+    {cat:'生物',cls:'cat-bio',
+     q:'細胞内でエネルギー（ATP）をつくり出す場所はどこか？',
+     a:'ミトコンドリア',
+     exp:'有機物＋O₂→CO₂＋H₂O＋エネルギー。これが細胞呼吸（内呼吸）。'},
+    {cat:'生物',cls:'cat-bio',
+     q:'遺伝の法則（優性の法則・分離の法則）を発見した科学者は誰か？',
+     a:'メンデル',
+     exp:'エンドウ豆を使った実験で法則を発見。「遺伝学の父」とも呼ばれる。'},
+    {cat:'生物',cls:'cat-bio',
+     q:'脊椎動物のうち、体温が一定の恒温動物は哺乳類と何類か？',
+     a:'鳥類',
+     exp:'魚類・両生類・爬虫類は変温動物。恒温動物は鳥類と哺乳類の2グループのみ。'},
+    // 地学
+    {cat:'地学',cls:'cat-earth',
+     q:'地球の表面を十数枚に分けて覆っている岩盤を何というか？',
+     a:'プレート',
+     exp:'年間数cmずつ移動し、境界でぶつかり合うことで地震・火山が発生する。'},
+    {cat:'地学',cls:'cat-earth',
+     q:'地震波のP波とS波のうち、より速く伝わるのはどちらか？',
+     a:'P波',
+     exp:'P波（縦波）が先に到達→初期微動。S波（横波）が後→主要動。P波は固体・液体を伝わる。'},
+    {cat:'地学',cls:'cat-earth',
+     q:'日本の天気が西から東へ変わりやすい主な原因は何か？',
+     a:'偏西風',
+     exp:'中緯度帯（日本上空）では常に西→東へ偏西風が吹いており、低気圧・高気圧も東へ移動する。'},
+    {cat:'地学',cls:'cat-earth',
+     q:'暖気が寒気の上にゆっくり乗り上げ、広い範囲に弱い雨をもたらす前線は何か？',
+     a:'温暖前線',
+     exp:'前線の東側に広い雨域。通過後は気温が上昇する。天気図では半円の記号で表す。'},
+    {cat:'地学',cls:'cat-earth',
+     q:'地層の中に残された生物の遺骸や生活の痕跡を何というか？',
+     a:'化石',
+     exp:'示準化石は地層の年代を知る手がかり。示相化石は堆積した環境を知る手がかり。'},
+    {cat:'地学',cls:'cat-earth',
+     q:'月が満月から次の満月になるまでの周期は約何日か？',
+     a:'約29.5日',
+     exp:'これを「朔望月」という。月の自転・公転周期は同じ（約27.3日）で、常に同じ面が地球を向く。'},
+    {cat:'地学',cls:'cat-earth',
+     q:'太陽系で最も大きな惑星はどれか？',
+     a:'木星',
+     exp:'直径は地球の約11倍。大赤斑（巨大な嵐）が有名。ガス惑星の代表格。'},
+];
+
+// ── PARTICLES ────────────────────────────────────────────────────────────────
+(function(){
+    const cv=document.getElementById('bg-cv');
+    const ctx=cv.getContext('2d');
+    let pts=[];
+    function resize(){cv.width=innerWidth;cv.height=innerHeight;}
+    addEventListener('resize',resize); resize();
+    function mkPt(){return{x:Math.random()*cv.width,y:cv.height+4,
+        r:Math.random()*1.4+.3,s:Math.random()*.55+.2,a:Math.random()*.35+.07,
+        col:Math.random()>.5?'#00ffcc':'#0088ff',t:Math.random()*120};}
+    function draw(){
+        ctx.clearRect(0,0,cv.width,cv.height);
+        if(pts.length<55)pts.push(mkPt());
+        pts=pts.filter(p=>p.y>-8);
+        for(const p of pts){
+            p.y-=p.s; p.x+=Math.sin((p.y+p.t)/65)*.35;
+            ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+            ctx.fillStyle=p.col;ctx.globalAlpha=p.a;ctx.fill();
+        }
+        ctx.globalAlpha=1; requestAnimationFrame(draw);
+    }
+    draw();
+})();
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+}
+function show(id){
+    ['top-screen','quiz-screen','result-screen'].forEach(s=>{
+        document.getElementById(s).style.display=s===id?'flex':'none';
+    });
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let queue=[]; let mastered=new Set();
+let rp=0,correct=0,totalAnswered=0,streak=0,maxStreak=0,revealed=false;
+
+// ── QUIZ ──────────────────────────────────────────────────────────────────────
+function startQuiz(){
+    queue=shuffle(CARDS.map((_,i)=>i));
+    mastered.clear();
+    rp=0;correct=0;totalAnswered=0;streak=0;maxStreak=0;
+    show('quiz-screen'); loadCard();
+}
+
+function loadCard(){
+    if(queue.length===0){showResult();return;}
+    revealed=false;
+    const card=CARDS[queue[0]];
+    document.getElementById('q-cat').textContent=card.cat;
+    document.getElementById('q-cat').className='q-cat '+card.cls;
+    document.getElementById('q-text').textContent=card.q;
+    document.getElementById('back-answer').textContent=card.a;
+    document.getElementById('back-exp').textContent=card.exp;
+    document.getElementById('flip-card').classList.remove('flipped');
+    document.getElementById('btn-reveal').style.display='block';
+    document.getElementById('judge-row').classList.remove('show');
+}
+
+function reveal(){
+    if(revealed)return; revealed=true;
+    document.getElementById('flip-card').classList.add('flipped');
+    setTimeout(()=>{
+        document.getElementById('btn-reveal').style.display='none';
+        document.getElementById('judge-row').classList.add('show');
+    },420);
+}
+
+function judge(ok){
+    if(!revealed)return;
+    totalAnswered++;
+    const idx=queue[0];
+    if(ok){
+        mastered.add(idx); queue.shift();
+        correct++; streak++; maxStreak=Math.max(maxStreak,streak);
+        const bonus=streak>=10?30:streak>=5?20:streak>=3?15:10;
+        rp+=bonus;
+        showRPPopup('+'+bonus+' RP'+(streak>=3?' 🔥':''));
+        flashScreen('green');
+        if(streak===3) showCombo('🔥 3連続！');
+        if(streak===5) showCombo('💥 5連続！！');
+        if(streak===10)showCombo('⚡ 10連続！！！');
+    }else{
+        queue.shift(); queue.push(idx);
+        streak=0; flashScreen('red');
+    }
+    updateHUD();
+    setTimeout(loadCard,360);
+}
+
+function updateHUD(){
+    document.getElementById('rp-val').textContent=rp;
+    const pct=Math.round((mastered.size/CARDS.length)*100);
+    document.getElementById('gauge-bar').style.width=pct+'%';
+    document.getElementById('gauge-pct').textContent=mastered.size+' / '+CARDS.length;
+    document.getElementById('prog-chip').textContent='残り '+queue.length+'問';
+    document.getElementById('correct-chip').textContent='✓ 正解 '+correct;
+    document.getElementById('streak-num').textContent=streak;
+    const sw=document.getElementById('streak-wrap');
+    sw.className='streak-wrap'+(streak>=10?' hot10':streak>=5?' hot5':streak>=3?' hot3':'');
+}
+
+// ── EFFECTS ───────────────────────────────────────────────────────────────────
+function flashScreen(color){
+    const el=document.getElementById('flash');
+    el.className='flash '+color+' show';
+    setTimeout(()=>el.className='flash '+color,140);
+}
+function showCombo(txt){
+    const el=document.createElement('div');
+    el.className='combo-popup'; el.textContent=txt;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),880);
+}
+function showRPPopup(txt){
+    const el=document.createElement('div');
+    el.className='rp-popup'; el.textContent=txt;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),950);
+}
+
+// ── RESULT ────────────────────────────────────────────────────────────────────
+function showResult(){
+    const acc=totalAnswered>0?Math.round((correct/totalAnswered)*100):0;
+    document.getElementById('res-rp').textContent=rp;
+    document.getElementById('res-acc').textContent=acc+'%';
+    document.getElementById('res-streak').textContent=maxStreak;
+    document.getElementById('res-total').textContent=totalAnswered;
+    let stars,msg;
+    if(acc>=90&&maxStreak>=5){
+        stars='⭐⭐⭐';
+        msg='パーフェクト研究者！都立最上位校もこの調子で狙えます。次は時間を計って再挑戦！🎯';
+    }else if(acc>=70){
+        stars='⭐⭐';
+        msg='よくできました！正答率は合格ライン。間違えた問題を重点的に繰り返そう！💪';
+    }else{
+        stars='⭐';
+        msg='まだまだこれから！繰り返すことで必ず定着します。科学の道に近道なし！🔬';
+    }
+    document.getElementById('res-stars').textContent=stars;
+    document.getElementById('res-msg').textContent=msg;
+    show('result-screen');
+}
+
+function resetQuiz(){ show('top-screen'); }
+</script>
+</body>
+</html>
