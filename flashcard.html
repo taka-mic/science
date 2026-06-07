@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciLab - 理科フラッシュカード</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:    #060c1a;
+            --bg2:   #0a1628;
+            --bg3:   #0d1f3c;
+            --cyan:  #00ffcc;
+            --blue:  #0088ff;
+            --purple:#8800ff;
+            --green: #00ff64;
+            --text:  #d0e8ff;
+            --dim:   #6888aa;
+        }
+
+        html, body { height: 100%; background: var(--bg); color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
+
+        /* grid */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                linear-gradient(rgba(0,136,255,.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,136,255,.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none; z-index: 0;
+        }
+
+        /* scanlines */
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 2px,
+                rgba(0,0,0,.07) 2px, rgba(0,0,0,.07) 4px);
+            pointer-events: none; z-index: 0;
+        }
+
+        canvas#bg-cv { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        .screen { position: relative; z-index: 1; min-height: 100vh; }
+
+        /* ══════════════════════════════════════════
+           TOP SCREEN
+        ══════════════════════════════════════════ */
+        #top-screen {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 40px 24px; gap: 0;
+        }
+
+        .top-badge {
+            font-size: .68rem; letter-spacing: .25em; color: var(--cyan);
+            border: 1px solid rgba(0,255,204,.3); padding: 4px 16px;
+            border-radius: 20px; margin-bottom: 28px; text-transform: uppercase;
+            animation: blink-border 3s ease-in-out infinite;
+        }
+
+        @keyframes blink-border {
+            0%,100% { border-color: rgba(0,255,204,.3); box-shadow: none; }
+            50%     { border-color: rgba(0,255,204,.7); box-shadow: 0 0 10px rgba(0,255,204,.2); }
+        }
+
+        .top-icon {
+            font-size: 5rem; margin-bottom: 18px;
+            animation: float 5s ease-in-out infinite;
+            filter: drop-shadow(0 0 18px rgba(0,255,204,.65));
+        }
+
+        .top-title {
+            font-size: clamp(2.6rem, 9vw, 4.8rem); font-weight: 900;
+            letter-spacing: .15em;
+            background: linear-gradient(120deg, var(--cyan) 0%, var(--blue) 55%, var(--purple) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 28px rgba(0,255,204,.4));
+            margin-bottom: 6px;
+        }
+
+        .top-sub {
+            font-size: .82rem; letter-spacing: .3em; color: var(--dim);
+            text-transform: uppercase; margin-bottom: 36px;
+        }
+
+        .top-desc {
+            text-align: center; font-size: .95rem; color: var(--dim);
+            line-height: 1.85; max-width: 380px; margin-bottom: 40px;
+        }
+        .top-desc strong { color: var(--cyan); }
+
+        .start-btn {
+            position: relative; padding: 16px 56px; font-size: 1.02rem;
+            font-weight: 700; letter-spacing: .12em; color: #000d1a;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            border: none; border-radius: 4px; cursor: pointer; overflow: hidden;
+            transition: transform .2s, box-shadow .2s; text-transform: uppercase;
+            box-shadow: 0 0 24px rgba(0,255,204,.4), 0 0 48px rgba(0,136,255,.15);
+        }
+        .start-btn::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,.18) 50%, transparent 70%);
+            transform: translateX(-100%); transition: transform .5s;
+        }
+        .start-btn:hover { transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 0 36px rgba(0,255,204,.6), 0 0 70px rgba(0,136,255,.25); }
+        .start-btn:hover::before { transform: translateX(100%); }
+        .start-btn:active { transform: scale(.97); }
+
+        /* ══════════════════════════════════════════
+           QUIZ SCREEN
+        ══════════════════════════════════════════ */
+        #quiz-screen { display: none; flex-direction: column; }
+
+        /* header */
+        .qhdr {
+            padding: 14px 18px 10px;
+            background: rgba(6,12,26,.88); border-bottom: 1px solid rgba(0,136,255,.2);
+            backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 10;
+        }
+        .qhdr-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .qhdr-logo { font-size: .73rem; letter-spacing: .2em; color: var(--dim); text-transform: uppercase; }
+        .rp-display { display: flex; align-items: baseline; gap: 4px; }
+        .rp-val {
+            font-size: 1.5rem; font-weight: 900; color: var(--cyan);
+            font-variant-numeric: tabular-nums; transition: color .3s;
+        }
+        .rp-label { font-size: .65rem; color: var(--dim); letter-spacing: .1em; }
+
+        .gauge-wrap {
+            width: 100%; height: 6px;
+            background: rgba(255,255,255,.08); border-radius: 3px;
+        }
+        .gauge-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+            border-radius: 3px;
+            transition: width .65s cubic-bezier(.34,1.56,.64,1);
+            box-shadow: 0 0 10px rgba(0,255,204,.5);
+        }
+        .gauge-pct { text-align: right; font-size: .65rem; color: var(--dim); margin-top: 4px; }
+
+        /* progress row */
+        .prog-row { display: flex; justify-content: center; gap: 12px; padding: 10px 18px; }
+        .prog-chip {
+            font-size: .72rem; padding: 3px 14px; border-radius: 20px;
+            background: rgba(0,136,255,.08); border: 1px solid rgba(0,136,255,.22); color: var(--dim);
+        }
+
+        /* question */
+        .q-area { padding: 20px 22px 10px; text-align: center; }
+        .q-cat {
+            display: inline-block; padding: 3px 16px; border-radius: 20px;
+            font-size: .68rem; font-weight: 700; letter-spacing: .14em;
+            text-transform: uppercase; margin-bottom: 14px;
+        }
+        .cat-chem { background: rgba(255,160,0,.12); color: #ffaa00; border: 1px solid rgba(255,160,0,.3); }
+        .cat-phys { background: rgba(0,136,255,.12); color: #44aaff; border: 1px solid rgba(0,136,255,.3); }
+        .cat-bio  { background: rgba(0,255,100,.12); color: #44ff88; border: 1px solid rgba(0,255,100,.3); }
+
+        .q-text { font-size: clamp(.95rem, 3vw, 1.2rem); line-height: 1.8; color: var(--text); max-width: 560px; margin: 0 auto; }
+
+        /* flip card */
+        .card-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px 20px; }
+        .flip-card { width: 100%; max-width: 500px; height: 210px; perspective: 1200px; }
+        @media (min-width: 600px) { .flip-card { height: 260px; } }
+
+        .flip-inner {
+            position: relative; width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            transition: transform .65s cubic-bezier(.4,0,.2,1);
+        }
+        .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+
+        .flip-front, .flip-back {
+            position: absolute; inset: 0; backface-visibility: hidden;
+            border-radius: 14px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 24px; gap: 8px;
+        }
+
+        /* corner brackets */
+        .flip-front::before, .flip-front::after,
+        .flip-back::before,  .flip-back::after {
+            content: ''; position: absolute; width: 18px; height: 18px;
+        }
+
+        .flip-front {
+            background: var(--bg3);
+            border: 1px solid rgba(0,136,255,.3);
+            box-shadow: 0 0 0 1px rgba(0,136,255,.07) inset, 0 24px 60px rgba(0,0,0,.5);
+        }
+        .flip-front::before { top: 8px; left: 8px; border-top: 2px solid var(--blue); border-left: 2px solid var(--blue); border-radius: 2px 0 0 0; }
+        .flip-front::after  { bottom: 8px; right: 8px; border-bottom: 2px solid var(--blue); border-right: 2px solid var(--blue); border-radius: 0 0 2px 0; }
+
+        .flip-back {
+            background: linear-gradient(145deg, #04160a, #091e12);
+            border: 1px solid rgba(0,255,100,.38);
+            box-shadow: 0 0 0 1px rgba(0,255,100,.07) inset, 0 24px 60px rgba(0,0,0,.5);
+            transform: rotateY(180deg);
+        }
+        .flip-back::before { top: 8px; left: 8px; border-top: 2px solid var(--green); border-left: 2px solid var(--green); border-radius: 2px 0 0 0; }
+        .flip-back::after  { bottom: 8px; right: 8px; border-bottom: 2px solid var(--green); border-right: 2px solid var(--green); border-radius: 0 0 2px 0; }
+
+        .front-icon { font-size: 2.8rem; opacity: .22; }
+        .front-hint { font-size: .72rem; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
+
+        .back-label { font-size: .68rem; color: rgba(0,255,100,.6); letter-spacing: .18em; text-transform: uppercase; }
+        .back-answer {
+            font-size: clamp(1.6rem, 5.5vw, 2.2rem); font-weight: 900;
+            color: var(--green); text-shadow: 0 0 22px rgba(0,255,100,.55);
+            text-align: center;
+        }
+        .back-exp { font-size: .82rem; color: #80b890; line-height: 1.65; text-align: center; max-width: 380px; }
+
+        /* action buttons */
+        .actions { padding: 0 18px 30px; max-width: 520px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 10px; }
+
+        .btn-reveal {
+            padding: 14px; background: rgba(0,136,255,.1);
+            border: 1px solid rgba(0,136,255,.45); border-radius: 8px;
+            color: var(--blue); font-size: .97rem; font-weight: 600;
+            letter-spacing: .06em; cursor: pointer; transition: all .2s;
+        }
+        .btn-reveal:hover { background: rgba(0,136,255,.2); box-shadow: 0 0 18px rgba(0,136,255,.3); }
+
+        .judge-row { display: none; gap: 10px; }
+        .judge-row.show { display: flex; }
+
+        .btn-ok, .btn-ng {
+            flex: 1; padding: 14px; border: none; border-radius: 8px;
+            font-size: .97rem; font-weight: 700; cursor: pointer;
+            letter-spacing: .05em; transition: all .2s;
+        }
+        .btn-ok { background: linear-gradient(135deg, #007733, var(--green)); color: #001a08; box-shadow: 0 0 14px rgba(0,255,100,.25); }
+        .btn-ok:hover { transform: translateY(-2px); box-shadow: 0 0 26px rgba(0,255,100,.5); }
+        .btn-ng { background: linear-gradient(135deg, #990033, #ff0055); color: #1a0010; box-shadow: 0 0 14px rgba(255,0,80,.25); }
+        .btn-ng:hover { transform: translateY(-2px); box-shadow: 0 0 26px rgba(255,0,80,.5); }
+
+        /* ══════════════════════════════════════════
+           RESULT SCREEN
+        ══════════════════════════════════════════ */
+        #result-screen {
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 50px 24px; text-align: center; gap: 12px;
+        }
+
+        .res-icon { font-size: 5rem; animation: float 4s ease-in-out infinite; }
+        .res-title {
+            font-size: clamp(1.9rem, 6vw, 2.6rem); font-weight: 900;
+            background: linear-gradient(120deg, var(--cyan), var(--blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .res-rp-label { font-size: .78rem; color: var(--dim); letter-spacing: .18em; text-transform: uppercase; margin-top: 8px; }
+        .res-rp {
+            font-size: clamp(3rem, 10vw, 4.5rem); font-weight: 900;
+            color: var(--cyan); text-shadow: 0 0 28px rgba(0,255,204,.5); line-height: 1;
+        }
+        .res-stars { font-size: 2rem; letter-spacing: .2em; margin: 4px 0; }
+        .res-msg { font-size: .9rem; color: var(--dim); line-height: 1.75; max-width: 380px; margin: 8px 0 20px; }
+
+        .btn-restart {
+            padding: 14px 46px;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            border: none; border-radius: 6px; color: #000d1a;
+            font-size: 1rem; font-weight: 700; cursor: pointer;
+            letter-spacing: .08em; text-transform: uppercase; transition: all .2s;
+        }
+        .btn-restart:hover { transform: translateY(-2px); box-shadow: 0 0 26px rgba(0,255,204,.45); }
+
+        /* ── RP POPUP ── */
+        .rp-popup {
+            position: fixed; top: 52px; right: 22px;
+            font-size: 1.3rem; font-weight: 900;
+            color: var(--cyan); text-shadow: 0 0 14px var(--cyan);
+            pointer-events: none;
+            animation: popup-anim .9s ease-out forwards; z-index: 999;
+        }
+        @keyframes popup-anim {
+            0%   { opacity: 0; transform: translateY(8px) scale(.7); }
+            30%  { opacity: 1; transform: translateY(-22px) scale(1.15); }
+            100% { opacity: 0; transform: translateY(-58px) scale(1); }
+        }
+
+        /* ── SHARED ── */
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50%     { transform: translateY(-12px); }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="bg-cv"></canvas>
+
+<!-- ═══ TOP SCREEN ═══ -->
+<div id="top-screen" class="screen">
+    <div class="top-badge">⚗️ Science Lab v1.0</div>
+    <div class="top-icon">🔬</div>
+    <div class="top-title">SciLab</div>
+    <div class="top-sub">Flashcard Research System</div>
+    <p class="top-desc">
+        <strong>多摩科学技術高校</strong>などの理系上位校を<br>
+        目指す君のためのインタラクティブ<br>理科学習システム
+    </p>
+    <button class="start-btn" onclick="startQuiz()">🚀 &nbsp;研究を始める</button>
+</div>
+
+<!-- ═══ QUIZ SCREEN ═══ -->
+<div id="quiz-screen" class="screen">
+    <div class="qhdr">
+        <div class="qhdr-row">
+            <span class="qhdr-logo">⚗️ SciLab Research</span>
+            <div class="rp-display">
+                <span class="rp-val" id="rp-val">0</span>
+                <span class="rp-label">&nbsp;RP</span>
+            </div>
+        </div>
+        <div class="gauge-wrap">
+            <div class="gauge-bar" id="gauge-bar"></div>
+        </div>
+        <div class="gauge-pct" id="gauge-pct">研究ゲージ 0%</div>
+    </div>
+
+    <div class="prog-row">
+        <span class="prog-chip" id="prog-chip">残り 3問</span>
+        <span class="prog-chip" id="correct-chip">✓ 正解 0</span>
+    </div>
+
+    <div class="q-area">
+        <div class="q-cat" id="q-cat"></div>
+        <p class="q-text" id="q-text"></p>
+    </div>
+
+    <div class="card-wrap">
+        <div class="flip-card" id="flip-card">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <div class="front-icon">❓</div>
+                    <div class="front-hint">答えを考えてみよう</div>
+                </div>
+                <div class="flip-back">
+                    <div class="back-label">✨ 正解</div>
+                    <div class="back-answer" id="back-answer"></div>
+                    <div class="back-exp" id="back-exp"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn-reveal" id="btn-reveal" onclick="reveal()">🔍 &nbsp;答えを見る</button>
+        <div class="judge-row" id="judge-row">
+            <button class="btn-ok" onclick="judge(true)">✅ 覚えた！</button>
+            <button class="btn-ng" onclick="judge(false)">🔄 まだ…</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ RESULT SCREEN ═══ -->
+<div id="result-screen" class="screen">
+    <div class="res-icon">🏆</div>
+    <div class="res-title">研究完了！</div>
+    <div class="res-rp-label">獲得 研究ポイント</div>
+    <div class="res-rp" id="res-rp">0 RP</div>
+    <div class="res-stars" id="res-stars"></div>
+    <p class="res-msg" id="res-msg"></p>
+    <button class="btn-restart" onclick="resetQuiz()">🔬 &nbsp;もう一度研究する</button>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────
+const CARDS = [
+    {
+        cat: '化学', catCls: 'cat-chem',
+        q: '銅4.0gを完全に加熱したとき、結びつく酸素の最大質量は何gか？',
+        a: '1.0g',
+        exp: '銅：酸素 ＝ 4：1 の比率で結びつきます。多摩科技を目指すなら、この計算は一瞬でできるようにしよう！'
+    },
+    {
+        cat: '物理', catCls: 'cat-phys',
+        q: '回路に流れる電流を大きくするには、抵抗をどうすればよいか？',
+        a: '小さくする',
+        exp: 'オームの法則（V ＝ IR）より、電圧が一定なら電流と抵抗は反比例します。'
+    },
+    {
+        cat: '生物', catCls: 'cat-bio',
+        q: '顕微鏡で対物レンズを倍率の高いものに変えたとき、視野の明るさはどうなるか？',
+        a: '暗くなる',
+        exp: '倍率を上げると見える範囲が狭くなるため、光の量が減って暗くなります。'
+    }
+];
+
+const MAX_RP = 30;
+
+// ── BACKGROUND PARTICLES ─────────────────────────────────────────────
+(function () {
+    const cv = document.getElementById('bg-cv');
+    const ctx = cv.getContext('2d');
+    let pts = [];
+
+    function resize() { cv.width = innerWidth; cv.height = innerHeight; }
+    addEventListener('resize', resize);
+    resize();
+
+    function mkPt() {
+        return {
+            x: Math.random() * cv.width,
+            y: cv.height + 4,
+            r: Math.random() * 1.4 + .3,
+            s: Math.random() * .55 + .2,
+            a: Math.random() * .38 + .08,
+            col: Math.random() > .5 ? '#00ffcc' : '#0088ff',
+            t: Math.random() * 120
+        };
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        if (pts.length < 55) pts.push(mkPt());
+        pts = pts.filter(p => p.y > -8);
+        for (const p of pts) {
+            p.y -= p.s;
+            p.x += Math.sin((p.y + p.t) / 65) * .35;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = p.col;
+            ctx.globalAlpha = p.a;
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+
+// ── STATE ─────────────────────────────────────────────────────────────
+let queue   = [];   // array of card indices still in play
+let rp      = 0;
+let correct = 0;
+let revealed = false;
+
+// ── SCREENS ───────────────────────────────────────────────────────────
+function show(id) {
+    ['top-screen', 'quiz-screen', 'result-screen'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? 'flex' : 'none';
+    });
+}
+
+// ── QUIZ ──────────────────────────────────────────────────────────────
+function startQuiz() {
+    queue = CARDS.map((_, i) => i);
+    rp = 0; correct = 0;
+    show('quiz-screen');
+    loadCard();
+}
+
+function loadCard() {
+    if (queue.length === 0) { showResult(); return; }
+    revealed = false;
+
+    const card = CARDS[queue[0]];
+
+    document.getElementById('q-cat').textContent = card.cat;
+    document.getElementById('q-cat').className   = 'q-cat ' + card.catCls;
+    document.getElementById('q-text').textContent      = card.q;
+    document.getElementById('back-answer').textContent = card.a;
+    document.getElementById('back-exp').textContent    = card.exp;
+
+    document.getElementById('flip-card').classList.remove('flipped');
+    document.getElementById('btn-reveal').style.display = 'block';
+    document.getElementById('judge-row').classList.remove('show');
+
+    updateHUD();
+}
+
+function reveal() {
+    if (revealed) return;
+    revealed = true;
+    document.getElementById('flip-card').classList.add('flipped');
+    setTimeout(() => {
+        document.getElementById('btn-reveal').style.display = 'none';
+        document.getElementById('judge-row').classList.add('show');
+    }, 420);
+}
+
+function judge(ok) {
+    if (!revealed) return;
+
+    if (ok) {
+        correct++;
+        rp = Math.min(rp + 10, MAX_RP);
+        showRPPopup('+10 RP');
+        queue.shift();                  // remove from queue
+    } else {
+        const idx = queue.shift();
+        queue.push(idx);               // move to end → asked again later
+    }
+
+    updateHUD();
+    setTimeout(loadCard, 360);
+}
+
+function updateHUD() {
+    document.getElementById('rp-val').textContent  = rp;
+    const pct = Math.round((rp / MAX_RP) * 100);
+    document.getElementById('gauge-bar').style.width = pct + '%';
+    document.getElementById('gauge-pct').textContent = '研究ゲージ ' + pct + '%';
+    document.getElementById('prog-chip').textContent    = '残り ' + queue.length + '問';
+    document.getElementById('correct-chip').textContent = '✓ 正解 ' + correct;
+}
+
+function showRPPopup(txt) {
+    const el = document.createElement('div');
+    el.className   = 'rp-popup';
+    el.textContent = txt;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 950);
+}
+
+// ── RESULT ────────────────────────────────────────────────────────────
+function showResult() {
+    document.getElementById('res-rp').textContent = rp + ' RP';
+
+    let stars, msg;
+    if (rp >= 30) {
+        stars = '⭐⭐⭐';
+        msg   = '完璧！全問一発正解！多摩科技への道が大きく開けました。この調子で全分野を制覇しよう！🎯';
+    } else if (rp >= 20) {
+        stars = '⭐⭐';
+        msg   = 'よくできました！あと少し。間違えた問題を中心にもう一度チャレンジしてみよう！💪';
+    } else {
+        stars = '⭐';
+        msg   = 'まだまだ伸びしろ大！繰り返し解くことで必ず定着します。科学者への道は諦めないことから始まる！🔬';
+    }
+
+    document.getElementById('res-stars').textContent = stars;
+    document.getElementById('res-msg').textContent   = msg;
+    show('result-screen');
+}
+
+function resetQuiz() {
+    show('top-screen');
+}
+</script>
+</body>
+</html>
